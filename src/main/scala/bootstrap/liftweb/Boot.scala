@@ -1,15 +1,16 @@
 package bootstrap.liftweb
 
-import _root_.net.liftweb.util._
-import _root_.net.liftweb.common._
-import _root_.net.liftweb.http._
-import _root_.net.liftweb.http.provider._
-import _root_.net.liftweb.sitemap._
-import _root_.net.liftweb.sitemap.Loc._
+import net.liftweb._
+import util._
 import Helpers._
-import _root_.net.liftweb.mapper.{DB, ConnectionManager, Schemifier, DefaultConnectionIdentifier, StandardDBVendor}
-import _root_.java.sql.{Connection, DriverManager}
-import _root_.code.model._
+
+import common._
+import http._
+import sitemap._
+import Loc._
+import mapper._
+
+import code.model._
 
 
 /**
@@ -30,41 +31,44 @@ class Boot {
       DB.defineConnectionManager(DefaultConnectionIdentifier, vendor)
     }
 
-    // where to search snippet
-    LiftRules.addToPackages("code")
+    // Use Lift's Mapper ORM to populate the database
+    // you don't need to use Mapper to use Lift... use
+    // any ORM you want
     Schemifier.schemify(true, Schemifier.infoF _, User)
 
+    // where to search snippet
+    LiftRules.addToPackages("code")
+
     // Build SiteMap
-    val entries = Menu(Loc("Home", List("index"), "Home")) ::
-    Menu(Loc("Static", Link(List("static"), true, "/static/index"), 
-	     "Static Content")) ::
+    val entries = List(
+      Menu.i("Home") / "index", // the simple way to declare a menu
+
+      // more complex because this menu allows anything in the
+      // /static path to be visible
+      Menu(Loc("Static", Link(List("static"), true, "/static/index"), 
+	       "Static Content"))) :::
+    // the User management menu items
     User.sitemap
 
+    // set the sitemap.  Note if you don't want access control for
+    // each page, just comment this line out.
     LiftRules.setSiteMap(SiteMap(entries:_*))
 
-    /*
-     * Show the spinny image when an Ajax call starts
-     */
+    //Show the spinny image when an Ajax call starts
     LiftRules.ajaxStart =
       Full(() => LiftRules.jsArtifacts.show("ajax-loader").cmd)
-
-    /*
-     * Make the spinny image go away when it ends
-     */
+    
+    // Make the spinny image go away when it ends
     LiftRules.ajaxEnd =
       Full(() => LiftRules.jsArtifacts.hide("ajax-loader").cmd)
 
-    LiftRules.early.append(makeUtf8)
+    // Force the request to be UTF-8
+    LiftRules.early.append(_.setCharacterEncoding("UTF-8"))
 
+    // What is the function to test if a user is logged in?
     LiftRules.loggedInTest = Full(() => User.loggedIn_?)
 
+    // Make a transaction span the whole HTTP request
     S.addAround(DB.buildLoanWrapper)
-  }
-
-  /**
-   * Force the request to be UTF-8
-   */
-  private def makeUtf8(req: HTTPRequest) {
-    req.setCharacterEncoding("UTF-8")
   }
 }
