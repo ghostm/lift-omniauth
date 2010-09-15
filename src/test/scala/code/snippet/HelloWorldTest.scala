@@ -2,7 +2,7 @@ package code {
 package snippet {
 
 import org.specs._
-import org.specs.runner.JUnit3
+import org.specs.runner.JUnit4
 import org.specs.runner.ConsoleRunner
 import net.liftweb._
 import http._
@@ -14,7 +14,7 @@ import Helpers._
 import lib._
 
 
-class HelloWorldTestSpecsAsTest extends JUnit3(HelloWorldTestSpecs)
+class HelloWorldTestSpecsAsTest extends JUnit4(HelloWorldTestSpecs)
 object HelloWorldTestSpecsRunner extends ConsoleRunner(HelloWorldTestSpecs)
 
 object HelloWorldTestSpecs extends Specification {
