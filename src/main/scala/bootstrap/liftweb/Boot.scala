@@ -43,6 +43,10 @@ class Boot {
     val entries = List(
       Menu.i("Home") / "index", // the simple way to declare a menu
 
+      //Omniauth site menu items
+      Menu(Loc("AuthCallback", List("omniauth","callback"), "AuthCallback", Hidden)),
+      Menu(Loc("AuthSignin", List("omniauth", "signin"), "AuthSignin", Hidden)),
+
       // more complex because this menu allows anything in the
       // /static path to be visible
       Menu(Loc("Static", Link(List("static"), true, "/static/index"), 
@@ -67,6 +71,17 @@ class Boot {
 
     // What is the function to test if a user is logged in?
     LiftRules.loggedInTest = Full(() => User.loggedIn_?)
+
+    //Omniauth request rewrites
+    LiftRules.statelessRewrite.prepend {
+      case RewriteRequest(ParsePath(List("auth", providerName, "signin"), _, _, _), _, _) =>
+        RewriteResponse("omniauth"::"signin" :: Nil, Map("provider" -> providerName))
+    }
+    LiftRules.statelessRewrite.prepend {
+      case RewriteRequest(ParsePath(List("auth", providerName, "callback"), _, _, _), _, _) =>
+        RewriteResponse("omniauth"::"callback":: Nil, Map("provider" -> providerName))
+    }
+
 
     // Make a transaction span the whole HTTP request
     S.addAround(DB.buildLoanWrapper)

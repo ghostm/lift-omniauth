@@ -10,6 +10,9 @@ class LiftProject(info: ProjectInfo) extends DefaultWebProject(info) {
   // this line
   // override def scanDirectories = Nil
 
+  val databinder_net = "databinder.net repository" at "http://databinder.net/repo"
+  val dispatch = "net.databinder" %% "dispatch-twitter" % "0.7.7"
+
   override def libraryDependencies = Set(
     "net.liftweb" %% "lift-webkit" % liftVersion % "compile->default",
     "net.liftweb" %% "lift-mapper" % liftVersion % "compile->default",
