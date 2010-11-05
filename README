@@ -1,1 +1,6 @@
 Early work on an omniauth module for Lift
+
+Signin with twitter and facebook are working.
+After a successful login the Omniauth.curAuthMap SessionVar will contain a map with information about the most recent authentication.
+This map will contain a provider, uid, and name for the user (and may contain more information)
+
