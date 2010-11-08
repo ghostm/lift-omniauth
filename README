@@ -9,6 +9,7 @@ in Boot.scala
     OmniauthLib.init(providers)
 
 After a user has logged into an auth provider you can access data through the session var OmniauthLib.currentAuthMap
+
     OmniauthLib.currentAuthMap match {
       case Full(omni) => ({
         println(omni.get(OmniauthLib.Provider))
