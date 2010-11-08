@@ -5,7 +5,7 @@
   <!-- set global properties for this build -->
   <property name="src" location="src/main/scala"/>
   <property name="build" location="target/scala_2.8.0/classes/"/>
-  <property name="dist"  location="dist"/>
+  <property name="dist"  location="liftModuleJars"/>
   <property name="lift_version"  value="2.1"/>
   <property name="scala_version"  value="2.8.0"/>
   <property name="build_version"  location="0.1"/>
