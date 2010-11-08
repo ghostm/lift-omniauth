@@ -1,6 +1,37 @@
-Early work on an omniauth module for Lift
+# Lift-Omniauth Module
+## Usage
+in Boot.scala
 
-Signin with twitter and facebook are working.
-After a successful login the Omniauth.curAuthMap SessionVar will contain a map with information about the most recent authentication.
-This map will contain a provider, uid, and name for the user (and may contain more information)
+    import omniauth.lib._
+    ...
+    //After SiteMap has been set.  OmniauthLib.init will modify the sitemap
+    val providers = List(new TwitterProvider("twitterKey","twitterSecret"), new FacebookProvider("facebookClientId","facebookClientSecret"))
+    OmniauthLib.init(providers)
 
+After a user has logged into an auth provider you can access data through the session var OmniauthLib.currentAuthMap
+    OmniauthLib.currentAuthMap match {
+      case Full(omni) => ({
+        println(omni.get(OmniauthLib.Provider))
+        println(omni.get(OmniauthLib.UID))
+        println(omni.get(OmniauthLib.UserInfo))
+      })
+    }
+
+## Installation
+
+To install Lift-OmniAuth, simply add the Lift-Omniauth.jar to the build path and add Dispatch's Twitter as a dependancy.
+Using SBT:
+Add Lift-Omniauth.jar to the ./lib folder
+Add the following to your SBT project file.
+
+    val databinder_net = "databinder.net repository" at "http://databinder.net/repo"
+    val dispatch = "net.databinder" %% "dispatch-twitter" % "0.7.7"
+
+    
+## Providers
+
+Lift-OmniAuth currently supports the following external providers:
+
+* via OAuth
+  * Facebook
+  * Twitter

@@ -1,0 +1,22 @@
+<project name="Lift-Omniauth" default="dist" basedir=".">
+    <description>
+        simple example build file
+    </description>
+  <!-- set global properties for this build -->
+  <property name="src" location="src/main/scala"/>
+  <property name="build" location="target/scala_2.8.0/classes/"/>
+  <property name="dist"  location="dist"/>
+  <property name="lift_version"  value="2.1"/>
+  <property name="scala_version"  value="2.8.0"/>
+  <property name="build_version"  location="0.1"/>
+
+  <target name="dist"
+        description="generate the distribution" >
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}"/>
+
+    <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+    <jar jarfile="${dist}/Lift-Omniauth_${scala_version}-${lift_version}.jar" basedir="${build}"  includes="omniauth/*/*"/>
+  </target>
+
+</project>
