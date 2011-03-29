@@ -54,9 +54,9 @@ class Boot {
     // set the sitemap.  Note if you don't want access control for
     // each page, just comment this line out.
     LiftRules.setSiteMap(SiteMap(entries:_*))
-    val pros = List(new TwitterProvider("twitterKey","twitterSecret"),
+    val providers = List(new TwitterProvider("twitterKey","twitterSecret"),
       new FacebookProvider("fbClientId","fbClientSecret"))
-    OmniauthLib.init(pros)
+    OmniauthLib.init(providers)
 
     //Show the spinny image when an Ajax call starts
     LiftRules.ajaxStart =

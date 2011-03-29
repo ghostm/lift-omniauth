@@ -22,7 +22,6 @@ import json._
 import JsHttp._
 import oauth._
 import oauth.OAuth._
-import twitter.{Status, Twitter, Auth}
 import xml.{Text, NodeSeq}
 import net.liftweb.common.{Full, Empty, Box}
 import net.liftweb.json.JsonParser
