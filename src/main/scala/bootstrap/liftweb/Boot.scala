@@ -9,8 +9,8 @@ import http._
 import sitemap._
 import Loc._
 import mapper._
-import omniauth.lib.{OmniauthLib, TwitterProvider, FacebookProvider}
-
+//import omniauth.lib.{OmniauthLib, TwitterProvider, FacebookProvider}
+import omniauth.Omniauth;
 import code.model._
 
 
@@ -39,7 +39,6 @@ class Boot {
 
     // where to search snippet
     LiftRules.addToPackages("code")
-
     // Build SiteMap
     val entries = List(
       Menu.i("Home") / "index", // the simple way to declare a menu
@@ -49,15 +48,14 @@ class Boot {
       Menu(Loc("Static", Link(List("static"), true, "/static/index"), 
 	       "Static Content"))) :::
     // the User management menu items
-    User.sitemap
+    User.sitemap :::
+    Omniauth.sitemap
 
     // set the sitemap.  Note if you don't want access control for
     // each page, just comment this line out.
     LiftRules.setSiteMap(SiteMap(entries:_*))
-    val providers = List(new TwitterProvider("twitterKey","twitterSecret"),
-      new FacebookProvider("fbClientId","fbClientSecret"))
-    OmniauthLib.init(providers)
 
+    Omniauth.init
     //Show the spinny image when an Ajax call starts
     LiftRules.ajaxStart =
       Full(() => LiftRules.jsArtifacts.show("ajax-loader").cmd)

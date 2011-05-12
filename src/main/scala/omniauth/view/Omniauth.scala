@@ -15,7 +15,8 @@
  */
 
 package omniauth.view
-import omniauth.lib.OmniauthLib
+import omniauth.Omniauth
+import omniauth.lib._
 import dispatch._
 import oauth.{Token, Consumer}
 import json._
@@ -40,24 +41,24 @@ class Omniauth extends LiftView {
 
   def doAuthSignin : NodeSeq = {
     println("doAuthSignin")
-    var provider = S.param("provider") openOr S.redirectTo(OmniauthLib.failureRedirect)
-    OmniauthLib.providers.foreach(p => {
-      if(p.provider.equalsIgnoreCase(provider)){
+    val provider = S.param("provider") openOr S.redirectTo(Omniauth.failureRedirect)
+    Omniauth.providers.foreach(p => {
+      if(p.providerName.equalsIgnoreCase(provider)){
         println("provider match")
         p.signIn
       }
     })
-    S.redirectTo(OmniauthLib.failureRedirect)
+    S.redirectTo(Omniauth.failureRedirect)
   }
 
   def doAuthCallback () : NodeSeq = {
-    var provider = S.param("provider") openOr S.redirectTo(OmniauthLib.failureRedirect)
-    OmniauthLib.providers.foreach(p => {
-      if(p.provider.equalsIgnoreCase(provider)){
+    val provider = S.param("provider") openOr S.redirectTo(Omniauth.failureRedirect)
+    Omniauth.providers.foreach(p => {
+      if(p.providerName.equalsIgnoreCase(provider)){
         p.callback
       }
     })
-    S.redirectTo(OmniauthLib.failureRedirect)
+    S.redirectTo(Omniauth.failureRedirect)
   }
 
 }

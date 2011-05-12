@@ -31,17 +31,17 @@ import net.liftweb.sitemap.{Menu, Loc, SiteMap}
 import Loc._
 
 
-class FacebookProvider(val clientId:String, val secret:String) extends OmniauthProvider{
-  def providerName = FacebookProvider.providerName
-  def providerPropertyKey = FacebookProvider.providerPropertyKey
-  def providerPropertySecret = FacebookProvider.providerPropertySecret
+class GithubProvider(val clientId:String, val secret:String) extends OmniauthProvider{
+  def providerName = GithubProvider.providerName
+  def providerPropertyKey = GithubProvider.providerPropertyKey
+  def providerPropertySecret = GithubProvider.providerPropertySecret
 
-  def signIn():NodeSeq = doFacebookSignin
-  def callback(): NodeSeq = doFacebookCallback
+  def signIn():NodeSeq = doGithubSignin
+  def callback(): NodeSeq = doGithubCallback
   implicit val formats = net.liftweb.json.DefaultFormats
 
-  def doFacebookSignin() : NodeSeq = {
-    var requestUrl = "https://graph.facebook.com/oauth/authorize?"
+  def doGithubSignin() : NodeSeq = {
+    var requestUrl = "https://github.com/login/oauth/authorize?"
     val callbackUrl = Omniauth.siteAuthBaseUrl+"auth/"+providerName+"/callback"
     var urlParameters = Map[String, String]()
     urlParameters += ("client_id" -> clientId)
@@ -50,34 +50,34 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
     S.redirectTo(requestUrl)
   }
 
-  def doFacebookCallback () : NodeSeq = {
-    val fbCode = S.param("code") openOr S.redirectTo("/")
+  def doGithubCallback () : NodeSeq = {
+    val ghCode = S.param("code") openOr S.redirectTo("/")
     val callbackUrl = Omniauth.siteAuthBaseUrl+"auth/"+providerName+"/callback"
     var urlParameters = Map[String, String]()
     urlParameters += ("client_id" -> clientId)
     urlParameters += ("redirect_uri" -> callbackUrl)
     urlParameters += ("client_secret" -> secret)
-    urlParameters += ("code" -> fbCode.toString)
-    var tempRequest = :/("graph.facebook.com").secure / "oauth/access_token" <<? urlParameters
+    urlParameters += ("code" -> ghCode.toString)
+    var tempRequest = :/("github.com").secure / "login/oauth/access_token" <<? urlParameters
     var accessTokenString = Omniauth.http(tempRequest as_str)
     if(accessTokenString.startsWith("access_token=")){
       accessTokenString = accessTokenString.stripPrefix("access_token=")
-      var ampIndex = accessTokenString.indexOf("&")
+      val ampIndex = accessTokenString.indexOf("&")
       if(ampIndex >= 0){
         accessTokenString = accessTokenString.take(ampIndex)
       }
-      tempRequest = :/("graph.facebook.com").secure / "me" <<? Map("access_token" -> accessTokenString)
+      tempRequest = :/("github.com").secure / "api/v2/json/user/show" <<? Map("access_token" -> accessTokenString)
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
-      var fbAuthMap = Map[String, Any]()
-      fbAuthMap += (Omniauth.Provider -> providerName)
-      fbAuthMap += (Omniauth.UID -> (json \ "id").extract[String])
-      var fbAuthUserInfoMap = Map[String, String]()
-      fbAuthUserInfoMap += (Omniauth.Name -> (json \ "name").extract[String])
-      fbAuthMap += (Omniauth.UserInfo -> fbAuthUserInfoMap)
-      var fbAuthCredentialsMap = Map[String, String]()
-      fbAuthCredentialsMap += (Omniauth.Token -> accessTokenString)
-      fbAuthMap += (Omniauth.Credentials -> fbAuthCredentialsMap)
-      Omniauth.setAuthMap(fbAuthMap)
+      var ghAuthMap = Map[String, Any]()
+      ghAuthMap += (Omniauth.Provider -> providerName)
+      ghAuthMap += (Omniauth.UID -> (json \ "user" \ "id").extract[String])
+      var ghAuthUserInfoMap = Map[String, String]()
+      ghAuthUserInfoMap += (Omniauth.Name -> (json \ "user" \ "name").extract[String])
+      ghAuthMap += (Omniauth.UserInfo -> ghAuthUserInfoMap)
+      var ghAuthCredentialsMap = Map[String, String]()
+      ghAuthCredentialsMap += (Omniauth.Token -> accessTokenString)
+      ghAuthMap += (Omniauth.Credentials -> ghAuthCredentialsMap)
+      Omniauth.setAuthMap(ghAuthMap)
       S.redirectTo(Omniauth.successRedirect)
     }else{
       println("didn't find access token")
@@ -86,9 +86,9 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
   }
 }
 
-object FacebookProvider {
-  val providerName = "facebook"
-  val providerPropertyKey = "omniauth.facebookkey"
-  val providerPropertySecret = "omniauth.facebooksecret"
+object GithubProvider{
+  val providerName = "github"
+  val providerPropertyKey = "omniauth.githubkey"
+  val providerPropertySecret = "omniauth.githubsecret"
 }
 

@@ -4,9 +4,15 @@ in Boot.scala
 
     import omniauth.lib._
     ...
-    //After SiteMap has been set.  OmniauthLib.init will modify the sitemap
-    val providers = List(new TwitterProvider("twitterKey","twitterSecret"), new FacebookProvider("facebookClientId","facebookClientSecret"))
-    OmniauthLib.init(providers)
+    //Add Omniauth to the sitemap
+    Omniauth.sitemap
+    //Omniauth init
+    OmniauthLib.init
+
+in your properties file define your client id (key) and secret for each provider you will use
+
+    omniauth.facebooksecret=...
+    omniauth.facebookkey=...
 
 After a user has logged into an auth provider you can access data through the session var OmniauthLib.currentAuthMap
 
@@ -36,3 +42,4 @@ Lift-OmniAuth currently supports the following external providers:
 * via OAuth
   * Facebook
   * Twitter
+  * Github

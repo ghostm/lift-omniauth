@@ -1,3 +1,5 @@
+package omniauth
+
 /*
  * Copyright 2010-2011 Matthew Henderson
  *
@@ -14,8 +16,7 @@
  * limitations under the License.
  */
 
-package omniauth.lib
-
+import omniauth.lib._
 import dispatch._
 import oauth.{Token, Consumer}
 import json._
@@ -23,17 +24,17 @@ import JsHttp._
 import oauth._
 import oauth.OAuth._
 import xml.{Text, NodeSeq}
-import net.liftweb.common.{Full, Empty, Box}
 import net.liftweb.json.JsonParser
 import net.liftweb.json.JsonAST._
 import net.liftweb.http._
 import net.liftweb.sitemap.{Menu, Loc, SiteMap}
 import Loc._
+import net.liftweb.util.Props
+import net.liftweb.common._
 
-object OmniauthLib  {
+object Omniauth  {
+  val logger = Logger("omniauth.Omniauth")
   val http = new Http
-  val TwitterProviderName = "twitter"
-  val FacebookProviderName = "facebook"
   val Provider = "Provider"
   val UID = "UID"
   val UserInfo = "UserInfo"
@@ -68,17 +69,41 @@ object OmniauthLib  {
     curAuthMap(Full(m))
   }
 
-  def init(providerList:List[OmniauthProvider], baseUrl:String = "http://localhost:8080/", successUrl:String = "/", failureUrl:String = "/") = {
-    providers = providerList
-    siteAuthBaseUrl = baseUrl
-    successRedirect = successUrl
-    failureRedirect = failureUrl
+  private def providerListFromProperties():List[OmniauthProvider] = {
+    List(getProviderFromProperties(FacebookProvider.providerName, FacebookProvider.providerPropertyKey, FacebookProvider.providerPropertySecret),
+    getProviderFromProperties(GithubProvider.providerName, GithubProvider.providerPropertyKey, GithubProvider.providerPropertySecret),
+    getProviderFromProperties(TwitterProvider.providerName, TwitterProvider.providerPropertyKey, TwitterProvider.providerPropertySecret)).flatten(a => a)
+  }
+
+  private def getProviderFromProperties(providerName:String, providerKey:String, providerSecret:String):Box[OmniauthProvider] = {
+     Props.get(providerKey) match {
+      case Full(pk) => Props.get(providerSecret) match {
+        case Full(ps) => {
+          providerName match {
+            case TwitterProvider.providerName => Full(new TwitterProvider(pk, ps))
+            case FacebookProvider.providerName => Full(new FacebookProvider(pk, ps))
+            case GithubProvider.providerName => Full(new GithubProvider(pk, ps))
+            case _ => {
+              logger.warn("no provider found for "+providerName)
+              Empty
+            }
+          }
+        }
+        case Empty => logger.warn("getProviderFromProperties: empty secret"); Empty
+        case Failure(_,_,_) => logger.warn("getProviderFromProperties: fail secret"); Empty
+      }
+      case Empty => logger.warn("getProviderFromProperties: empty key"); Empty
+      case Failure(_,_,_) => logger.warn("getProviderFromProperties: fail key"); Empty
+    }
+  }
+
+  def init = {
+    providers = providerListFromProperties()
+    siteAuthBaseUrl = Props.get("omniauth.baseurl") openOr "http://localhost:8080/"
+    successRedirect = Props.get("omniauth.successurl") openOr "/"
+    failureRedirect = Props.get("omniauth.failureurl") openOr "/"
+
     LiftRules.addToPackages("omniauth")
-    var tempSiteMap = LiftRules.siteMap openOr SiteMap()
-    var siteMapKids:Seq[Menu] = tempSiteMap.kids
-    siteMapKids = siteMapKids :+ Menu(Loc("AuthCallback", List("omniauth","callback"), "AuthCallback", Hidden))
-    siteMapKids = siteMapKids :+ Menu(Loc("AuthSignin", List("omniauth", "signin"), "AuthSignin", Hidden))
-    LiftRules.setSiteMap(SiteMap(siteMapKids:_*))
 
     //Omniauth request rewrites
     LiftRules.statelessRewrite.prepend {
@@ -90,4 +115,13 @@ object OmniauthLib  {
         RewriteResponse("omniauth"::"callback":: Nil, Map("provider" -> providerName))
     }
   }
+
+  def callbackMenuLoc: Box[Menu] =
+    Full(Menu(Loc("AuthCallback", List("omniauth","callback"), "AuthCallback", Hidden)))
+
+  def signinMenuLoc: Box[Menu] =
+    Full(Menu(Loc("AuthSignin", List("omniauth", "signin"), "AuthSignin", Hidden)))
+
+  lazy val sitemap: List[Menu] =
+    List(callbackMenuLoc, signinMenuLoc).flatten(a => a)
 }
