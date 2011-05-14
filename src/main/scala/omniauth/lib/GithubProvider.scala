@@ -58,7 +58,7 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
     urlParameters += ("redirect_uri" -> callbackUrl)
     urlParameters += ("client_secret" -> secret)
     urlParameters += ("code" -> ghCode.toString)
-    var tempRequest = :/("github.com").secure / "login/oauth/access_token" <<? urlParameters
+    val tempRequest = :/("github.com").secure / "login/oauth/access_token" <<? urlParameters
     var accessTokenString = Omniauth.http(tempRequest as_str)
     if(accessTokenString.startsWith("access_token=")){
       accessTokenString = accessTokenString.stripPrefix("access_token=")
@@ -66,7 +66,20 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
       if(ampIndex >= 0){
         accessTokenString = accessTokenString.take(ampIndex)
       }
-      tempRequest = :/("github.com").secure / "api/v2/json/user/show" <<? Map("access_token" -> accessTokenString)
+      if(validateToken(accessTokenString)){
+        S.redirectTo(Omniauth.successRedirect)
+      }else{
+        S.redirectTo(Omniauth.failureRedirect)
+      }
+    }else{
+      println("didn't find access token")
+      S.redirectTo(Omniauth.failureRedirect)
+    }
+  }
+
+  def validateToken(accessToken:String): Boolean = {
+    val tempRequest = :/("github.com").secure / "api/v2/json/user/show" <<? Map("access_token" -> accessToken)
+    try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
       var ghAuthMap = Map[String, Any]()
       ghAuthMap += (Omniauth.Provider -> providerName)
@@ -75,15 +88,15 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
       ghAuthUserInfoMap += (Omniauth.Name -> (json \ "user" \ "name").extract[String])
       ghAuthMap += (Omniauth.UserInfo -> ghAuthUserInfoMap)
       var ghAuthCredentialsMap = Map[String, String]()
-      ghAuthCredentialsMap += (Omniauth.Token -> accessTokenString)
+      ghAuthCredentialsMap += (Omniauth.Token -> accessToken)
       ghAuthMap += (Omniauth.Credentials -> ghAuthCredentialsMap)
       Omniauth.setAuthMap(ghAuthMap)
-      S.redirectTo(Omniauth.successRedirect)
-    }else{
-      println("didn't find access token")
-      S.redirectTo(Omniauth.failureRedirect)
+      true
+    } catch {
+      case _ => false
     }
   }
+
 }
 
 object GithubProvider{

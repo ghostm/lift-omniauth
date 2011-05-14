@@ -23,5 +23,6 @@ abstract class OmniauthProvider{
   def providerName: String
   def signIn(): NodeSeq
   def callback(): NodeSeq
+  def validateToken(token:String): Boolean
 }
 

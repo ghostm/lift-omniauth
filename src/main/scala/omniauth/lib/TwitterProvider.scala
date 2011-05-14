@@ -76,6 +76,10 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
     Omniauth.setAuthMap(twitterAuthMap)
     S.redirectTo(Omniauth.successRedirect)
   }
+
+  def validateToken(accessToken:String): Boolean = {
+    false
+  }
 }
 
 object TwitterProvider{

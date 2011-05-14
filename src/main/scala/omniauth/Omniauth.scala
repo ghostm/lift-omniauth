@@ -32,6 +32,8 @@ import Loc._
 import net.liftweb.util.Props
 import net.liftweb.common._
 
+
+
 object Omniauth  {
   val logger = Logger("omniauth.Omniauth")
   val http = new Http

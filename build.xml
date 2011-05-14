@@ -6,9 +6,9 @@
   <property name="src" location="src/main/scala"/>
   <property name="build" location="target/scala_2.8.1/classes/"/>
   <property name="dist"  location="liftModuleJars"/>
-  <property name="lift_version"  value="2.3-RC3"/>
+  <property name="lift_version"  value="2.3"/>
   <property name="scala_version"  value="2.8.1"/>
-  <property name="build_version"  location="0.2"/>
+  <property name="build_version"  location="0.3"/>
 
   <target name="dist"
         description="generate the distribution" >
@@ -16,7 +16,7 @@
     <mkdir dir="${dist}"/>
 
     <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
-    <jar jarfile="${dist}/Lift-Omniauth_${scala_version}-${lift_version}.jar" basedir="${build}"  includes="omniauth/*/*"/>
+    <jar jarfile="${dist}/Lift-Omniauth_${scala_version}-${lift_version}.jar" basedir="${build}" includes="omniauth/*, omniauth/*/*"/>
   </target>
 
 </project>

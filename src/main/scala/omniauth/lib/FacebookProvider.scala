@@ -58,15 +58,28 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
     urlParameters += ("redirect_uri" -> callbackUrl)
     urlParameters += ("client_secret" -> secret)
     urlParameters += ("code" -> fbCode.toString)
-    var tempRequest = :/("graph.facebook.com").secure / "oauth/access_token" <<? urlParameters
+    val tempRequest = :/("graph.facebook.com").secure / "oauth/access_token" <<? urlParameters
     var accessTokenString = Omniauth.http(tempRequest as_str)
     if(accessTokenString.startsWith("access_token=")){
       accessTokenString = accessTokenString.stripPrefix("access_token=")
-      var ampIndex = accessTokenString.indexOf("&")
+      val ampIndex = accessTokenString.indexOf("&")
       if(ampIndex >= 0){
         accessTokenString = accessTokenString.take(ampIndex)
       }
-      tempRequest = :/("graph.facebook.com").secure / "me" <<? Map("access_token" -> accessTokenString)
+      if(validateToken(accessTokenString)){
+        S.redirectTo(Omniauth.successRedirect)
+      }else{
+        S.redirectTo(Omniauth.failureRedirect)
+      }
+    }else{
+      println("didn't find access token")
+      S.redirectTo(Omniauth.failureRedirect)
+    }
+  }
+
+  def validateToken(accessToken:String): Boolean = {
+    val tempRequest = :/("graph.facebook.com").secure / "me" <<? Map("access_token" -> accessToken)
+    try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
       var fbAuthMap = Map[String, Any]()
       fbAuthMap += (Omniauth.Provider -> providerName)
@@ -75,13 +88,12 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
       fbAuthUserInfoMap += (Omniauth.Name -> (json \ "name").extract[String])
       fbAuthMap += (Omniauth.UserInfo -> fbAuthUserInfoMap)
       var fbAuthCredentialsMap = Map[String, String]()
-      fbAuthCredentialsMap += (Omniauth.Token -> accessTokenString)
+      fbAuthCredentialsMap += (Omniauth.Token -> accessToken)
       fbAuthMap += (Omniauth.Credentials -> fbAuthCredentialsMap)
       Omniauth.setAuthMap(fbAuthMap)
-      S.redirectTo(Omniauth.successRedirect)
-    }else{
-      println("didn't find access token")
-      S.redirectTo(Omniauth.failureRedirect)
+      true
+    } catch {
+      case _ => false
     }
   }
 }
