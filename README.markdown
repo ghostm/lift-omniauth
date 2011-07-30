@@ -14,6 +14,10 @@ in your properties file define your client id (key) and secret for each provider
     omniauth.facebooksecret=...
     omniauth.facebookkey=...
 
+For Facebook provider you can set permissions. For example:
+
+    omniauth.facebookpermissions=email,read_stream    
+
 After a user has logged into an auth provider you can access data through the session var OmniauthLib.currentAuthMap
 
     OmniauthLib.currentAuthMap match {
