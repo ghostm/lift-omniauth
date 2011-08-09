@@ -18,6 +18,7 @@ package omniauth
 
 import omniauth.lib._
 import dispatch._
+import dispatch.HandlerVerbs._
 import oauth.{Token, Consumer}
 import json._
 import JsHttp._
@@ -31,6 +32,9 @@ import net.liftweb.sitemap.{Menu, Loc, SiteMap}
 import Loc._
 import net.liftweb.util.Props
 import net.liftweb.common._
+import org.apache.http.client.utils.URLEncodedUtils
+import org.apache.http.message.BasicNameValuePair
+
 
 
 
@@ -45,8 +49,8 @@ object Omniauth  {
   val Credentials = "Credentials"
   val Token = "Token"
   val Secret = "Secret"
-  var TwitterHost = :/("api.twitter.com").secure
-  val twitterOauthRequest = TwitterHost / "oauth"
+  //var TwitterHost = :/("api.twitter.com").secure
+  //val twitterOauthRequest = TwitterHost / "oauth"
 
   var successRedirect = "/"
   var failureRedirect = "/"
@@ -99,8 +103,7 @@ object Omniauth  {
     }
   }
 
-  def init = {
-    providers = providerListFromProperties()
+  private def commonInit = {
     siteAuthBaseUrl = Props.get("omniauth.baseurl") openOr "http://localhost:8080/"
     successRedirect = Props.get("omniauth.successurl") openOr "/"
     failureRedirect = Props.get("omniauth.failureurl") openOr "/"
@@ -118,6 +121,16 @@ object Omniauth  {
     }
   }
 
+  def init = {
+    providers = providerListFromProperties()
+    commonInit
+  }
+
+  def initWithProviders(newProviders:List[OmniauthProvider]) = {
+    providers = newProviders
+    commonInit
+  }
+
   def callbackMenuLoc: Box[Menu] =
     Full(Menu(Loc("AuthCallback", List("omniauth","callback"), "AuthCallback", Hidden)))
 
@@ -126,4 +139,17 @@ object Omniauth  {
 
   lazy val sitemap: List[Menu] =
     List(callbackMenuLoc, signinMenuLoc).flatten(a => a)
+
+  def validateToken(provider:String, token:String): Boolean = {
+    Omniauth.providers.foreach(p => {
+      if(p.providerName.equalsIgnoreCase(provider)){
+        return p.validateToken(token)
+      }
+    })
+    false
+  }
+  def map2ee(values: Map[String, Any]) = java.util.Arrays asList (
+    values.toSeq map { case (k, v) => new BasicNameValuePair(k, v.toString) } toArray : _*
+  )
+  def q_str (values: Map[String, Any]) = URLEncodedUtils.format(map2ee(values), Request.factoryCharset)
 }

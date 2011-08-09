@@ -46,7 +46,7 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
     var urlParameters = Map[String, String]()
     urlParameters += ("client_id" -> clientId)
     urlParameters += ("redirect_uri" -> callbackUrl)
-    requestUrl += Http.q_str(urlParameters)
+    requestUrl += Omniauth.q_str(urlParameters)
     S.redirectTo(requestUrl)
   }
 

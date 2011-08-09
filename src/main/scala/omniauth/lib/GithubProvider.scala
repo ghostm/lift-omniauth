@@ -29,6 +29,8 @@ import net.liftweb.json.JsonAST._
 import net.liftweb.http._
 import net.liftweb.sitemap.{Menu, Loc, SiteMap}
 import Loc._
+import dispatch.HandlerVerbs._
+import dispatch.RequestVerbs
 
 
 class GithubProvider(val clientId:String, val secret:String) extends OmniauthProvider{
@@ -46,7 +48,7 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
     var urlParameters = Map[String, String]()
     urlParameters += ("client_id" -> clientId)
     urlParameters += ("redirect_uri" -> callbackUrl)
-    requestUrl += Http.q_str(urlParameters)
+    requestUrl += Omniauth.q_str(urlParameters)
     S.redirectTo(requestUrl)
   }
 

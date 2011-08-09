@@ -30,6 +30,7 @@ import net.liftweb.json.JsonAST._
 import net.liftweb.http._
 import net.liftweb.sitemap.{Menu, Loc, SiteMap}
 import Loc._
+import dispatch.HandlerVerbs._
 
 class TwitterProvider(val key:String, val secret:String) extends OmniauthProvider {
   def providerName = TwitterProvider.providerName
@@ -40,15 +41,16 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
   def callback(): NodeSeq = doTwitterCallback
   val consumer = Consumer(key, secret)
 
-  def twitterAuthenticateUrl(token: Token) = Omniauth.twitterOauthRequest / "authenticate" <<? token
+  //def twitterAuthenticateUrl(token: Token) = Omniauth.twitterOauthRequest / "authenticate" <<? token
 
   def doTwitterSignin () : NodeSeq = {
     println("doTwitterSignin")
     var callbackUrl = Omniauth.siteAuthBaseUrl+"auth/"+providerName+"/callback"
     var requestToken = Omniauth.http(Auth.request_token(consumer, callbackUrl))
-    val auth_uri = twitterAuthenticateUrl(requestToken).to_uri
-    Omniauth.setRequestToken(requestToken)
-    S.redirectTo(auth_uri.toString)
+    //val auth_uri = twitterAuthenticateUrl(requestToken).to_uri
+    //Omniauth.setRequestToken(requestToken)
+    //S.redirectTo(auth_uri.toString)
+    S.redirectTo("/")
   }
 
   def doTwitterCallback () : NodeSeq = {
@@ -60,6 +62,7 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
       }
       case _ => S.redirectTo(Omniauth.failureRedirect)
     }
+    /*
     var verifyCreds = Omniauth.TwitterHost / "1/account/verify_credentials.xml" <@ (consumer, Omniauth.currentAccessToken.open_!)
     var tempResponse = Omniauth.http(verifyCreds <> { _ \\ "user" })
     var twitterAuthMap = Map[String, Any]()
@@ -74,6 +77,7 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
     twitterAuthCredentialsMap += (Omniauth.Secret -> secret)
     twitterAuthMap += (Omniauth.Credentials -> twitterAuthCredentialsMap)
     Omniauth.setAuthMap(twitterAuthMap)
+    */
     S.redirectTo(Omniauth.successRedirect)
   }
 
