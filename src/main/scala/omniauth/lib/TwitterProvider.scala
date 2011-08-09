@@ -31,6 +31,8 @@ import net.liftweb.http._
 import net.liftweb.sitemap.{Menu, Loc, SiteMap}
 import Loc._
 import dispatch.HandlerVerbs._
+import net.liftweb.common._
+
 
 class TwitterProvider(val key:String, val secret:String) extends OmniauthProvider {
   def providerName = TwitterProvider.providerName
@@ -39,21 +41,28 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
 
   def signIn(): NodeSeq = doTwitterSignin
   def callback(): NodeSeq = doTwitterCallback
+
   val consumer = Consumer(key, secret)
 
-  //def twitterAuthenticateUrl(token: Token) = Omniauth.twitterOauthRequest / "authenticate" <<? token
+  val logger = Logger("omniauth.TwitterProvider")
+
+  def twitterAuthenticateUrl(token: Token) = Omniauth.twitterOauthRequest / "authenticate" with_token token
 
   def doTwitterSignin () : NodeSeq = {
-    println("doTwitterSignin")
+    logger.debug("doTwitterSignin")
+    logger.debug(consumer)
     var callbackUrl = Omniauth.siteAuthBaseUrl+"auth/"+providerName+"/callback"
+    logger.debug(callbackUrl)
     var requestToken = Omniauth.http(Auth.request_token(consumer, callbackUrl))
-    //val auth_uri = twitterAuthenticateUrl(requestToken).to_uri
-    //Omniauth.setRequestToken(requestToken)
-    //S.redirectTo(auth_uri.toString)
-    S.redirectTo("/")
+    val auth_uri = twitterAuthenticateUrl(requestToken).to_uri
+    logger.debug(auth_uri.toString)
+    Omniauth.setRequestToken(requestToken)
+    S.redirectTo(auth_uri.toString)
   }
 
   def doTwitterCallback () : NodeSeq = {
+    logger.debug("doTwitterCallback")
+
     var verifier = S.param("oauth_verifier") openOr S.redirectTo(Omniauth.failureRedirect)
     var requestToken = Omniauth.currentRequestToken openOr S.redirectTo(Omniauth.failureRedirect)
     Omniauth.http(Auth.access_token(consumer, requestToken, verifier)) match {
@@ -62,7 +71,7 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
       }
       case _ => S.redirectTo(Omniauth.failureRedirect)
     }
-    /*
+    
     var verifyCreds = Omniauth.TwitterHost / "1/account/verify_credentials.xml" <@ (consumer, Omniauth.currentAccessToken.open_!)
     var tempResponse = Omniauth.http(verifyCreds <> { _ \\ "user" })
     var twitterAuthMap = Map[String, Any]()
@@ -77,7 +86,8 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
     twitterAuthCredentialsMap += (Omniauth.Secret -> secret)
     twitterAuthMap += (Omniauth.Credentials -> twitterAuthCredentialsMap)
     Omniauth.setAuthMap(twitterAuthMap)
-    */
+    logger.debug("Omniauth.setAuthMap(twitterAuthMap) "+twitterAuthMap)
+
     S.redirectTo(Omniauth.successRedirect)
   }
 
@@ -88,6 +98,6 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
 
 object TwitterProvider{
   val providerName = "twitter"
-  val providerPropertyKey = "omniauth.twittersecret"
-  val providerPropertySecret = "omniauth.twitterkey"
+  val providerPropertyKey = "omniauth.twitterkey"
+  val providerPropertySecret = "omniauth.twittersecret"
 }

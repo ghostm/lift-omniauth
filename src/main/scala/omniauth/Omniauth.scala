@@ -49,13 +49,13 @@ object Omniauth  {
   val Credentials = "Credentials"
   val Token = "Token"
   val Secret = "Secret"
-  //var TwitterHost = :/("api.twitter.com").secure
-  //val twitterOauthRequest = TwitterHost / "oauth"
+  var TwitterHost = :/("api.twitter.com").secure
+  val twitterOauthRequest = TwitterHost / "oauth"
 
   var successRedirect = "/"
   var failureRedirect = "/"
   var providers:List[OmniauthProvider] = List[OmniauthProvider]()
-  var siteAuthBaseUrl = "http://localhost:8080/"
+  var siteAuthBaseUrl = "http://0.0.0.0:8080/"
 
   private object curRequestToken extends SessionVar[Box[Token]](Empty)
   def currentRequestToken: Box[Token] = curRequestToken.is
@@ -104,7 +104,7 @@ object Omniauth  {
   }
 
   private def commonInit = {
-    siteAuthBaseUrl = Props.get("omniauth.baseurl") openOr "http://localhost:8080/"
+    siteAuthBaseUrl = Props.get("omniauth.baseurl") openOr "http://0.0.0.0:8080/"
     successRedirect = Props.get("omniauth.successurl") openOr "/"
     failureRedirect = Props.get("omniauth.failureurl") openOr "/"
 
