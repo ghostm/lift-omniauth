@@ -1,7 +1,7 @@
 import sbt._
 
 class LiftProject(info: ProjectInfo) extends DefaultProject(info) {
-  val liftVersion = "2.3"
+  val liftVersion = "2.4-M1"
 
   // uncomment the following if you want to use the snapshot repo
   //val scalatoolsSnapshot = ScalaToolsSnapshots
@@ -11,7 +11,8 @@ class LiftProject(info: ProjectInfo) extends DefaultProject(info) {
   // override def scanDirectories = Nil
 
   val databinder_net = "databinder.net repository" at "http://databinder.net/repo"
-  val dispatch = "net.databinder" %% "dispatch-twitter" % "0.7.7"
+  val dispatch = "net.databinder" %% "dispatch-http" % "0.8.3"
+  val dispatchTwitter = "net.databinder" %% "dispatch-twitter" % "0.8.3"
 
   override def libraryDependencies = Set(
     "net.liftweb" %% "lift-webkit" % liftVersion % "compile->default",
