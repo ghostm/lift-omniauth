@@ -18,10 +18,6 @@ class LiftProject(info: ProjectInfo) extends DefaultProject(info) with Eclipsify
   val dispatchTwitter = "net.databinder" %% "dispatch-twitter" % "0.8.3"
 
   override def libraryDependencies = Set(
-    "net.liftweb" %% "lift-webkit" % liftVersion % "compile->default",
-    
-    "org.specs2" %% "specs2" % "1.5"  % "test->default",
-    "com.h2database" % "h2" % "1.2.138",
-    "ch.qos.logback" % "logback-classic" % "0.9.26"
+    "net.liftweb" %% "lift-webkit" % liftVersion % "compile->default"
   ) ++ super.libraryDependencies
 }
