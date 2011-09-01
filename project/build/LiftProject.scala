@@ -25,6 +25,6 @@ class LiftProject(info: ProjectInfo) extends DefaultProject(info) with Eclipsify
 
   val publishTo = "liftmodules repository" at "https://repository-liftmodules.forge.cloudbees.com/release/"
  
-  Credentials( "private" / "liftmodules" / "cloudbees.credentials",log)
+  Credentials( new java.io.File( "/private/liftmodules/cloudbees.credentials"),log)
   
 }
