@@ -20,4 +20,11 @@ class LiftProject(info: ProjectInfo) extends DefaultProject(info) with Eclipsify
   override def libraryDependencies = Set(
     "net.liftweb" %% "lift-webkit" % liftVersion % "compile->default"
   ) ++ super.libraryDependencies
+  
+// To publish to the Cloudbees repos:
+
+  val publishTo = "liftmodules repository" at "https://repository-liftmodules.forge.cloudbees.com/release/"
+ 
+  Credentials( "private" / "liftmodules" / "cloudbees.credentials",log)
+  
 }
