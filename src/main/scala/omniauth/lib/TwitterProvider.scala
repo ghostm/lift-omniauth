@@ -62,37 +62,49 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
 
   def doTwitterCallback () : NodeSeq = {
     logger.debug("doTwitterCallback")
-
     var verifier = S.param("oauth_verifier") openOr S.redirectTo(Omniauth.failureRedirect)
     var requestToken = Omniauth.currentRequestToken openOr S.redirectTo(Omniauth.failureRedirect)
     Omniauth.http(Auth.access_token(consumer, requestToken, verifier)) match {
       case (access_tok, tempUid, screen_name) => {
-        Omniauth.setAccessToken(access_tok)
+        if(validateToken(""+access_tok.value+","+access_tok.secret)){
+          S.redirectTo(Omniauth.successRedirect)
+        }else{
+          S.redirectTo(Omniauth.failureRedirect)
+        }
       }
       case _ => S.redirectTo(Omniauth.failureRedirect)
     }
-    
-    var verifyCreds = Omniauth.TwitterHost / "1/account/verify_credentials.xml" <@ (consumer, Omniauth.currentAccessToken.open_!)
-    var tempResponse = Omniauth.http(verifyCreds <> { _ \\ "user" })
-    var twitterAuthMap = Map[String, Any]()
-    twitterAuthMap += (Omniauth.Provider -> providerName)
-    twitterAuthMap += (Omniauth.UID -> (tempResponse \ "id").text)
-    var twitterAuthUserInfoMap = Map[String, String]()
-    twitterAuthUserInfoMap += (Omniauth.Name -> (tempResponse \ "name").text)
-    twitterAuthUserInfoMap += (Omniauth.Nickname -> (tempResponse \ "screen_name").text)
-    twitterAuthMap += (Omniauth.UserInfo -> twitterAuthUserInfoMap)
-    var twitterAuthCredentialsMap = Map[String, String]()
-    twitterAuthCredentialsMap += (Omniauth.Token -> Omniauth.currentAccessToken.open_!.value)
-    twitterAuthCredentialsMap += (Omniauth.Secret -> secret)
-    twitterAuthMap += (Omniauth.Credentials -> twitterAuthCredentialsMap)
-    Omniauth.setAuthMap(twitterAuthMap)
-    logger.debug("Omniauth.setAuthMap(twitterAuthMap) "+twitterAuthMap)
-
-    S.redirectTo(Omniauth.successRedirect)
   }
 
+  //Token must be of the format value,secret
   def validateToken(accessToken:String): Boolean = {
-    false
+    val tokenParts = accessToken.split(",")
+    if(tokenParts.length != 2){
+      logger.debug("tokenParts.length != 2: "+accessToken)
+      return false
+    }
+    val authToken = Token(tokenParts(0), tokenParts(1))
+    logger.debug("authToken "+authToken)
+    var verifyCreds = Omniauth.TwitterHost / "1/account/verify_credentials.xml" <@ (consumer, authToken)
+    try{
+      var tempResponse = Omniauth.http(verifyCreds <> { _ \\ "user" })
+      var twitterAuthMap = Map[String, Any]()
+      twitterAuthMap += (Omniauth.Provider -> providerName)
+      twitterAuthMap += (Omniauth.UID -> (tempResponse \ "id").text)
+      var twitterAuthUserInfoMap = Map[String, String]()
+      twitterAuthUserInfoMap += (Omniauth.Name -> (tempResponse \ "name").text)
+      twitterAuthUserInfoMap += (Omniauth.Nickname -> (tempResponse \ "screen_name").text)
+      twitterAuthMap += (Omniauth.UserInfo -> twitterAuthUserInfoMap)
+      var twitterAuthCredentialsMap = Map[String, String]()
+      twitterAuthCredentialsMap += (Omniauth.Token -> authToken.value)
+      twitterAuthCredentialsMap += (Omniauth.Secret -> authToken.secret)
+      twitterAuthMap += (Omniauth.Credentials -> twitterAuthCredentialsMap)
+      Omniauth.setAuthMap(twitterAuthMap)
+      logger.debug("Omniauth.setAuthMap(twitterAuthMap) "+twitterAuthMap)
+      true
+    } catch {
+      case e:Exception => logger.debug("Exception= "+e);false;
+    }
   }
 }
 
