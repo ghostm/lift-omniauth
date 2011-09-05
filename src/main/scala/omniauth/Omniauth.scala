@@ -122,6 +122,10 @@ object Omniauth  {
   }
 
   def init = {
+    ResourceServer.allow({
+    	case "img" ::  img  => true
+    })    
+
     providers = providerListFromProperties()
     commonInit
   }
