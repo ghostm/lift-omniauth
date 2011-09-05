@@ -19,10 +19,10 @@ object SignUp {
   def TwitterTransparentLightIcon = twitter("sign-in-with-twitter-l-sm")
   def TwitterTransparentDarkIcon =twitter("sign-in-with-twitter-d-sm") 
   
-  def FacebookNormal = twitter("LoginWithFacebookNormal")
-  def FacebookNormalDark = twitter("LoginWithFacebookNormalDark")
-  def FacebookLarge = twitter("LoginWithFacebookLarge")
-  def FacebookLargeDark = twitter("LoginWithFacebookLargeDark")
+  def FacebookNormal = facebook("LoginWithFacebookNormal")
+  def FacebookNormalDark = facebook("LoginWithFacebookNormalDark")
+  def FacebookLarge = facebook("LoginWithFacebookLarge")
+  def FacebookLargeDark = facebook("LoginWithFacebookLargeDark")
    
   
 }
