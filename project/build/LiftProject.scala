@@ -14,11 +14,11 @@ class LiftProject(info: ProjectInfo) extends DefaultProject(info) with Eclipsify
   // override def scanDirectories = Nil
 
   val databinder_net = "databinder.net repository" at "http://databinder.net/repo"
-  val dispatch = "net.databinder" %% "dispatch-http" % "0.8.3"
-  val dispatchTwitter = "net.databinder" %% "dispatch-twitter" % "0.8.3"
 
   override def libraryDependencies = Set(
-    "net.liftweb" %% "lift-webkit" % liftVersion % "compile->default"
+    "net.liftweb" %% "lift-webkit" % liftVersion % "compile->default",
+    "net.databinder" %% "dispatch-http" % "0.8.3",
+    "net.databinder" %% "dispatch-twitter" % "0.8.3"
   ) ++ super.libraryDependencies
   
 // To publish to the Cloudbees repos:
