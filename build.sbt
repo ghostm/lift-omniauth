@@ -1,6 +1,6 @@
 name := "Omniauth"
 
-version := "2.4-M3-0.2"
+version := "2.4-M4-0.2"
 
 organization := "net.liftmodules"
  
