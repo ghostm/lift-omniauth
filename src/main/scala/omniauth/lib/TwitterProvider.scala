@@ -22,7 +22,7 @@ import json._
 import JsHttp._
 import oauth._
 import oauth.OAuth._
-import twitter.{Status, Twitter, Auth}
+import twitter.{Auth}
 import xml.{Text, NodeSeq}
 import net.liftweb.common.{Full, Empty, Box}
 import net.liftweb.json.JsonParser
@@ -30,7 +30,6 @@ import net.liftweb.json.JsonAST._
 import net.liftweb.http._
 import net.liftweb.sitemap.{Menu, Loc, SiteMap}
 import Loc._
-import dispatch.HandlerVerbs._
 import net.liftweb.common._
 
 

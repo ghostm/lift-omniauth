@@ -61,3 +61,4 @@ runner
 
 providerInfo.txt
 /.scala_dependencies
+/.target/
