@@ -29,7 +29,6 @@ import net.liftweb.json.JsonAST._
 import net.liftweb.http._
 import net.liftweb.sitemap.{Menu, Loc, SiteMap}
 import Loc._
-import dispatch.HandlerVerbs._
 import dispatch.RequestVerbs
 
 

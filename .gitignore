@@ -60,3 +60,5 @@ lift_proto*
 runner
 
 providerInfo.txt
+/.scala_dependencies
+/.target/
