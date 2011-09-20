@@ -46,6 +46,8 @@ class Omniauth extends LiftView with Loggable {
       if (p.providerName.equalsIgnoreCase(provider)) {
         logger.debug("provider match")
         try  { p.signIn } catch  {
+        	//This is what we expect to happen, p.signIn should have a S.redirectTo(....) which will
+            //throw the following exception if the URL is not local.
         	case rse: LiftFlowOfControlException => throw rse
         	case kaboom: Exception => logger.error("attempting auth sign in ",kaboom) 
         }                
@@ -61,10 +63,7 @@ class Omniauth extends LiftView with Loggable {
     Omniauth.providers.foreach(p => {
       if (p.providerName.equalsIgnoreCase(provider)) {
         logger.debug("provider match")
-        try  { p.callback } catch  {
-        	case rse: LiftFlowOfControlException => throw rse
-        	case kaboom: Exception => logger.error("attempting auth call back ",kaboom) 
-        }        
+        p.callback 
       }
     })
     S.redirectTo(Omniauth.failureRedirect)
