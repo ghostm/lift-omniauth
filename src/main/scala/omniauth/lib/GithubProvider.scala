@@ -74,7 +74,7 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
         S.redirectTo(Omniauth.failureRedirect)
       }
     }else{
-      println("didn't find access token")
+      logger.debug("didn't find access token")
       S.redirectTo(Omniauth.failureRedirect)
     }
   }
@@ -88,8 +88,8 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
       val name =  (json \ "user" \ "name").extract[String]
       
       val ai = AuthInfo(providerName,uid,name,accessToken)
-      Omniauth.setAuthMap(ai)
-      logger.debug("Omniauth.setAuthMap(twitterAuthMap) "+ai)      
+      Omniauth.setAuthInfo(ai)
+      logger.debug(ai)     
       
       true
     } catch {

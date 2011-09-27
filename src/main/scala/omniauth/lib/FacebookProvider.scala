@@ -78,7 +78,7 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
         S.redirectTo(Omniauth.failureRedirect)
       }
     }else{
-      println("didn't find access token")
+      logger.debug("didn't find access token")
       S.redirectTo(Omniauth.failureRedirect)
     }
   }
@@ -92,8 +92,8 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
       val name =  (json \ "name").extract[String]
      
       val ai = AuthInfo(providerName,uid,name,accessToken,Some(secret))
-      Omniauth.setAuthMap(ai)
-      logger.debug("Omniauth.setAuthMap(twitterAuthMap) "+ai)
+      Omniauth.setAuthInfo(ai)
+      logger.debug(ai)
 
       true
     } catch {

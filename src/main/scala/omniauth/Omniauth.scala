@@ -60,11 +60,11 @@ object Omniauth  {
   
   def setAccessToken(tok:Token){ curAccessToken(Full(tok)) }
 
-  private object curAuthMap extends SessionVar[Box[AuthInfo]](Empty)
+  private object authInfo extends SessionVar[Box[AuthInfo]](Empty)
   
-  def currentAuthMap: Box[AuthInfo] = curAuthMap.is
+  def currentAuth: Box[AuthInfo] = authInfo.is
   
-  def setAuthMap(ai:AuthInfo){curAuthMap(Full(ai))}
+  def setAuthInfo(ai:AuthInfo){authInfo(Full(ai))}
 
   private def providerListFromProperties():List[OmniauthProvider] = {
     List(getProviderFromProperties(FacebookProvider.providerName, FacebookProvider.providerPropertyKey, FacebookProvider.providerPropertySecret),

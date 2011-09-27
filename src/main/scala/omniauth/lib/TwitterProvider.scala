@@ -92,8 +92,8 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
       val nickName = (tempResponse \ "screen_name").text
 
       val ai = AuthInfo(providerName,uid,name,authToken.value,Some(authToken.secret),Some(nickName))
-      Omniauth.setAuthMap(ai)
-      logger.debug("Omniauth.setAuthMap(twitterAuthMap) "+ai)
+      Omniauth.setAuthInfo(ai)
+      logger.debug(ai)
       true
     } catch {
       case e:Exception => logger.debug("Exception= "+e);false;
