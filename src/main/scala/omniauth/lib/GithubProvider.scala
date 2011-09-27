@@ -30,6 +30,7 @@ import net.liftweb.http._
 import net.liftweb.sitemap.{Menu, Loc, SiteMap}
 import Loc._
 import dispatch.RequestVerbs
+import omniauth.AuthInfo
 
 
 class GithubProvider(val clientId:String, val secret:String) extends OmniauthProvider{
@@ -82,16 +83,14 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
     val tempRequest = :/("github.com").secure / "api/v2/json/user/show" <<? Map("access_token" -> accessToken)
     try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
-      var ghAuthMap = Map[String, Any]()
-      ghAuthMap += (Omniauth.Provider -> providerName)
-      ghAuthMap += (Omniauth.UID -> (json \ "user" \ "id").extract[String])
-      var ghAuthUserInfoMap = Map[String, String]()
-      ghAuthUserInfoMap += (Omniauth.Name -> (json \ "user" \ "name").extract[String])
-      ghAuthMap += (Omniauth.UserInfo -> ghAuthUserInfoMap)
-      var ghAuthCredentialsMap = Map[String, String]()
-      ghAuthCredentialsMap += (Omniauth.Token -> accessToken)
-      ghAuthMap += (Omniauth.Credentials -> ghAuthCredentialsMap)
-      Omniauth.setAuthMap(ghAuthMap)
+      
+      val uid =  (json \ "user" \ "id").extract[String]
+      val name =  (json \ "user" \ "name").extract[String]
+      
+      val ai = AuthInfo(providerName,uid,name,accessToken)
+      Omniauth.setAuthMap(ai)
+      logger.debug("Omniauth.setAuthMap(twitterAuthMap) "+ai)      
+      
       true
     } catch {
       case _ => false

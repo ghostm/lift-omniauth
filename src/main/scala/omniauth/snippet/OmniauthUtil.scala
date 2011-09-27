@@ -23,7 +23,7 @@ import net.liftweb.common.{Failure, Empty, Full}
 class OmniauthUtil {
   def info(xhtml: NodeSeq) = {
     Omniauth.currentAuthMap match {
-      case Full(omni) => omni.map { s => <p>{s}</p> } toSeq
+      case Full(omni) => omni.productIterator.map{ s => <p>{s}</p> } toSeq
       case Empty => NodeSeq.Empty
       case Failure(_,_,_) => NodeSeq.Empty
     }  

@@ -17,9 +17,10 @@
 package omniauth.lib
 
 import xml.NodeSeq
+import net.liftweb.common.Loggable
 
 
-abstract class OmniauthProvider{
+abstract class OmniauthProvider extends Loggable {
   def providerName: String
   def signIn(): NodeSeq
   def callback(): NodeSeq
