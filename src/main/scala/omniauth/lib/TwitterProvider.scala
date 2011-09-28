@@ -105,6 +105,23 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
       case e:Exception => logger.debug("Exception= "+e);false;
     }
   }
+
+  def tokenToId(accessToken:String): Box[String] = {
+    val tokenParts = accessToken.split(",")
+    if(tokenParts.length != 2){
+      logger.debug("tokenParts.length != 2: "+accessToken)
+      return Empty
+    }
+    val authToken = Token(tokenParts(0), tokenParts(1))
+    logger.debug("authToken "+authToken)
+    var verifyCreds = Omniauth.TwitterHost / "1/account/verify_credentials.xml" <@ (consumer, authToken)
+    try{
+      var tempResponse = Omniauth.http(verifyCreds <> { _ \\ "user" })
+      Full((tempResponse \ "id").text)
+    }catch {
+      case e:Exception => logger.debug("Exception= "+e);Empty;
+    }
+  }
 }
 
 object TwitterProvider{

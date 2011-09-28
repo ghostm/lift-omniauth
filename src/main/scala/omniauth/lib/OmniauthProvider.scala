@@ -17,6 +17,7 @@
 package omniauth.lib
 
 import xml.NodeSeq
+import net.liftweb.common._
 
 
 abstract class OmniauthProvider{
@@ -24,5 +25,6 @@ abstract class OmniauthProvider{
   def signIn(): NodeSeq
   def callback(): NodeSeq
   def validateToken(token:String): Boolean
+  def tokenToId(token:String): Box[String]
 }
 
