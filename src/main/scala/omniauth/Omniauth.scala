@@ -95,6 +95,11 @@ object Omniauth  {
   }
 
   private def commonInit = {
+    
+    ResourceServer.allow({
+    	case "img" ::  img  => true
+    })       
+    
     siteAuthBaseUrl = Props.get("omniauth.baseurl") openOr "http://0.0.0.0:8080/"
     successRedirect = Props.get("omniauth.successurl") openOr "/"
     failureRedirect = Props.get("omniauth.failureurl") openOr "/"
@@ -113,10 +118,6 @@ object Omniauth  {
   }
 
   def init = {
-    ResourceServer.allow({
-    	case "img" ::  img  => true
-    })    
-
     providers = providerListFromProperties()
     commonInit
   }
