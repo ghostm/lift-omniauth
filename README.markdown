@@ -6,8 +6,12 @@ in Boot.scala
     ...
     //Add Omniauth to the sitemap
     Omniauth.sitemap
-    //Omniauth init
+    //init
+    //Supply a list of providers
+    Omniauth.initWithProviders(List(new FacebookProvider("key", "secret")))
+    //or init with providers in properties
     OmniauthLib.init
+        
 
 in your properties file define your client id (key) and secret for each provider you will use
 
@@ -28,15 +32,21 @@ After a user has logged into an auth provider you can access data through the se
       })
     }
 
+You can also use obtain a user's unique ID from a provider without using sessions using Omniauth.tokenToId(provider:String, token:String): Box[String]
+
+    Omniauth.tokenToId("facebook", token) match {
+      case Full(uid) => user.doSomethingWithFacebookId(uid)
+    }
+
 ## Installation
 
-To install Lift-OmniAuth, simply add the Lift-Omniauth.jar to the build path and add Dispatch's Twitter as a dependancy.
-Using SBT:
-Add Lift-Omniauth.jar to the ./lib folder
-Add the following to your SBT project file.
+A big thank you to [jonoabroad](https://github.com/jonoabroad) for hosting builds to make using much easier.
 
-    val databinder_net = "databinder.net repository" at "http://databinder.net/repo"
-    val dispatch = "net.databinder" %% "dispatch-twitter" % "0.7.7"
+    libraryDependencies ++= Seq(
+      "net.liftmodules" %% "omniauth" % "2.4-M4-0.3"
+    )
+
+    resolvers += "Omniauth repo" at "https://repository-liftmodules.forge.cloudbees.com/release"
 
     
 ## Providers
