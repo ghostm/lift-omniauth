@@ -144,6 +144,16 @@ object Omniauth  {
     })
     false
   }
+
+  def tokenToId(provider:String, token:String): Box[String] = {
+    Omniauth.providers.foreach(p => {
+      if(p.providerName.equalsIgnoreCase(provider)){
+        return p.tokenToId(token)
+      }
+    })
+    Empty
+  }
+
   def map2ee(values: Map[String, Any]) = java.util.Arrays asList (
     values.toSeq map { case (k, v) => new BasicNameValuePair(k, v.toString) } toArray : _*
   )

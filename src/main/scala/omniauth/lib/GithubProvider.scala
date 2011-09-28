@@ -97,6 +97,16 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
     }
   }
 
+  def tokenToId(accessToken:String): Box[String] = {
+    val tempRequest = :/("github.com").secure / "api/v2/json/user/show" <<? Map("access_token" -> accessToken)
+    try{
+      val json = Omniauth.http(tempRequest >- JsonParser.parse)
+      Full((json \ "user" \ "id").extract[String])
+    } catch {
+      case _ => Empty
+    }
+  }
+
 }
 
 object GithubProvider{
