@@ -40,14 +40,6 @@ import org.apache.http.message.BasicNameValuePair
 object Omniauth  {
   val logger = Logger("omniauth.Omniauth")
   val http = new Http
-  val Provider = "Provider"
-  val UID = "UID"
-  val UserInfo = "UserInfo"
-  val Name = "Name"
-  val Nickname = "Nickname"
-  val Credentials = "Credentials"
-  val Token = "Token"
-  val Secret = "Secret"
   var TwitterHost = :/("api.twitter.com").secure
   val twitterOauthRequest = TwitterHost / "oauth"
 
@@ -63,16 +55,16 @@ object Omniauth  {
   }
 
   private object curAccessToken extends SessionVar[Box[Token]](Empty)
+  
   def currentAccessToken: Box[Token] = curAccessToken.is
-  def setAccessToken(tok:Token){
-    curAccessToken(Full(tok))
-  }
+  
+  def setAccessToken(tok:Token){ curAccessToken(Full(tok)) }
 
-  private object curAuthMap extends SessionVar[Box[Map[String, Any]]](Empty)
-  def currentAuthMap: Box[Map[String, Any]] = curAuthMap.is
-  def setAuthMap(m:Map[String, Any]){
-    curAuthMap(Full(m))
-  }
+  private object authInfo extends SessionVar[Box[AuthInfo]](Empty)
+  
+  def currentAuth: Box[AuthInfo] = authInfo.is
+  
+  def setAuthInfo(ai:AuthInfo){authInfo(Full(ai))}
 
   private def providerListFromProperties():List[OmniauthProvider] = {
     List(getProviderFromProperties(FacebookProvider.providerName, FacebookProvider.providerPropertyKey, FacebookProvider.providerPropertySecret),
@@ -103,6 +95,11 @@ object Omniauth  {
   }
 
   private def commonInit = {
+    
+    ResourceServer.allow({
+    	case "img" ::  img  => true
+    })       
+    
     siteAuthBaseUrl = Props.get("omniauth.baseurl") openOr "http://0.0.0.0:8080/"
     successRedirect = Props.get("omniauth.successurl") openOr "/"
     failureRedirect = Props.get("omniauth.failureurl") openOr "/"
@@ -121,10 +118,6 @@ object Omniauth  {
   }
 
   def init = {
-    ResourceServer.allow({
-    	case "img" ::  img  => true
-    })    
-
     providers = providerListFromProperties()
     commonInit
   }
@@ -166,3 +159,4 @@ object Omniauth  {
   )
   def q_str (values: Map[String, Any]) = URLEncodedUtils.format(map2ee(values), Request.factoryCharset)
 }
+case class AuthInfo(provider:String,uid:String,name:String,token:String,secret:Option[String] = None,nickName:Option[String] = None)

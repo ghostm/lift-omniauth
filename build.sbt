@@ -1,6 +1,6 @@
 name := "Omniauth"
 
-version := "2.4-M4-0.4"
+version := "2.4-M4-0.5"
 
 organization := "net.liftmodules"
  
@@ -19,7 +19,7 @@ libraryDependencies ++= {
   val liftVersion = "2.4-M4" 
   Seq(
     "net.liftweb" %% "lift-webkit" % liftVersion % "compile->default",
-	"net.databinder" %% "dispatch-core" % "0.8.5",    
+	  "net.databinder" %% "dispatch-core" % "0.8.5",    
     "net.databinder" %% "dispatch-http" % "0.8.5",
     "net.databinder" %% "dispatch-oauth" % "0.8.5",    
     "net.databinder" %% "dispatch-http-json" % "0.8.5"
@@ -30,5 +30,6 @@ libraryDependencies ++= {
 
 publishTo := Some("liftmodules repository" at "https://repository-liftmodules.forge.cloudbees.com/release/")
  
-credentials += Credentials( file("cloudbees.credentials") )
+credentials += Credentials( file("/private/liftmodules/cloudbees.credentials") ) 
+
 

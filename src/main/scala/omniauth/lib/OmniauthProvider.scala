@@ -17,14 +17,13 @@
 package omniauth.lib
 
 import xml.NodeSeq
-import net.liftweb.common._
+import net.liftweb.common.{Box,Loggable}
 
 
-abstract class OmniauthProvider{
+abstract class OmniauthProvider extends Loggable {
   def providerName: String
   def signIn(): NodeSeq
   def callback(): NodeSeq
   def validateToken(token:String): Boolean
-  def tokenToId(token:String): Box[String]
+  def tokenToId(token:String): Box[String]  
 }
-

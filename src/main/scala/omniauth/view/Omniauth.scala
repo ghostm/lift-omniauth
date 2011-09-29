@@ -18,44 +18,52 @@ package omniauth.view
 import omniauth.Omniauth
 import omniauth.lib._
 import dispatch._
-import oauth.{Token, Consumer}
+import oauth.{ Token, Consumer }
 import json._
 import JsHttp._
 import oauth._
 import oauth.OAuth._
-import xml.{Text, NodeSeq}
-import net.liftweb.common.{Full, Empty, Box}
+import xml.{ Text, NodeSeq }
+import net.liftweb.common.{ Loggable, Full, Empty, Box }
 import net.liftweb.json.JsonParser
 import net.liftweb.json.JsonAST._
 import net.liftweb.http._
-import net.liftweb.sitemap.{Menu, Loc, SiteMap}
+import net.liftweb.sitemap.{ Menu, Loc, SiteMap }
 import Loc._
+import net.liftweb.util.LiftFlowOfControlException
 
-
-class Omniauth extends LiftView {
+class Omniauth extends LiftView with Loggable {
 
   override def dispatch = {
     case "signin" => doAuthSignin _
     case "callback" => doAuthCallback _
   }
 
-  def doAuthSignin : NodeSeq = {
-    println("doAuthSignin")
+  def doAuthSignin: NodeSeq = {
+    logger.debug("doAuthSignin")
     val provider = S.param("provider") openOr S.redirectTo(Omniauth.failureRedirect)
     Omniauth.providers.foreach(p => {
-      if(p.providerName.equalsIgnoreCase(provider)){
-        println("provider match")
-        p.signIn
+      if (p.providerName.equalsIgnoreCase(provider)) {
+        logger.debug("provider match")
+        try  { p.signIn } catch  {
+        	//This is what we expect to happen, p.signIn should have a S.redirectTo(....) which will
+            //throw the following exception if the URL is not local.
+        	case rse: LiftFlowOfControlException => throw rse
+        	case kaboom: Exception => logger.error("attempting auth sign in ",kaboom) 
+        }                
+        
       }
     })
     S.redirectTo(Omniauth.failureRedirect)
   }
 
-  def doAuthCallback () : NodeSeq = {
+  def doAuthCallback(): NodeSeq = {
+    logger.debug("doAuthCallback")
     val provider = S.param("provider") openOr S.redirectTo(Omniauth.failureRedirect)
     Omniauth.providers.foreach(p => {
-      if(p.providerName.equalsIgnoreCase(provider)){
-        p.callback
+      if (p.providerName.equalsIgnoreCase(provider)) {
+        logger.debug("provider match")
+        p.callback 
       }
     })
     S.redirectTo(Omniauth.failureRedirect)

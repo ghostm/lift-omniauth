@@ -30,6 +30,7 @@ import net.liftweb.http._
 import net.liftweb.util.Props
 import net.liftweb.sitemap.{Menu, Loc, SiteMap}
 import Loc._
+import omniauth.AuthInfo
 
 
 class FacebookProvider(val clientId:String, val secret:String) extends OmniauthProvider{
@@ -77,7 +78,7 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
         S.redirectTo(Omniauth.failureRedirect)
       }
     }else{
-      println("didn't find access token")
+      logger.debug("didn't find access token")
       S.redirectTo(Omniauth.failureRedirect)
     }
   }
@@ -86,16 +87,14 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
     val tempRequest = :/("graph.facebook.com").secure / "me" <<? Map("access_token" -> accessToken)
     try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
-      var fbAuthMap = Map[String, Any]()
-      fbAuthMap += (Omniauth.Provider -> providerName)
-      fbAuthMap += (Omniauth.UID -> (json \ "id").extract[String])
-      var fbAuthUserInfoMap = Map[String, String]()
-      fbAuthUserInfoMap += (Omniauth.Name -> (json \ "name").extract[String])
-      fbAuthMap += (Omniauth.UserInfo -> fbAuthUserInfoMap)
-      var fbAuthCredentialsMap = Map[String, String]()
-      fbAuthCredentialsMap += (Omniauth.Token -> accessToken)
-      fbAuthMap += (Omniauth.Credentials -> fbAuthCredentialsMap)
-      Omniauth.setAuthMap(fbAuthMap)
+
+      val uid =  (json \ "id").extract[String]
+      val name =  (json \ "name").extract[String]
+     
+      val ai = AuthInfo(providerName,uid,name,accessToken,Some(secret))
+      Omniauth.setAuthInfo(ai)
+      logger.debug(ai)
+
       true
     } catch {
       case _ => false

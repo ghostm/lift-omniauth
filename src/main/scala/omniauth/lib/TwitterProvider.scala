@@ -31,6 +31,7 @@ import net.liftweb.http._
 import net.liftweb.sitemap.{Menu, Loc, SiteMap}
 import Loc._
 import net.liftweb.common._
+import omniauth.AuthInfo
 
 
 class TwitterProvider(val key:String, val secret:String) extends OmniauthProvider {
@@ -42,8 +43,6 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
   def callback(): NodeSeq = doTwitterCallback
 
   val consumer = Consumer(key, secret)
-
-  val logger = Logger("omniauth.TwitterProvider")
 
   def twitterAuthenticateUrl(token: Token) = Omniauth.twitterOauthRequest / "authenticate" with_token token
 
@@ -86,20 +85,15 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
     logger.debug("authToken "+authToken)
     var verifyCreds = Omniauth.TwitterHost / "1/account/verify_credentials.xml" <@ (consumer, authToken)
     try{
-      var tempResponse = Omniauth.http(verifyCreds <> { _ \\ "user" })
-      var twitterAuthMap = Map[String, Any]()
-      twitterAuthMap += (Omniauth.Provider -> providerName)
-      twitterAuthMap += (Omniauth.UID -> (tempResponse \ "id").text)
-      var twitterAuthUserInfoMap = Map[String, String]()
-      twitterAuthUserInfoMap += (Omniauth.Name -> (tempResponse \ "name").text)
-      twitterAuthUserInfoMap += (Omniauth.Nickname -> (tempResponse \ "screen_name").text)
-      twitterAuthMap += (Omniauth.UserInfo -> twitterAuthUserInfoMap)
-      var twitterAuthCredentialsMap = Map[String, String]()
-      twitterAuthCredentialsMap += (Omniauth.Token -> authToken.value)
-      twitterAuthCredentialsMap += (Omniauth.Secret -> authToken.secret)
-      twitterAuthMap += (Omniauth.Credentials -> twitterAuthCredentialsMap)
-      Omniauth.setAuthMap(twitterAuthMap)
-      logger.debug("Omniauth.setAuthMap(twitterAuthMap) "+twitterAuthMap)
+      val tempResponse = Omniauth.http(verifyCreds <> { _ \\ "user" })
+
+      val uid = (tempResponse \ "id").text
+      val name = (tempResponse \ "name").text
+      val nickName = (tempResponse \ "screen_name").text
+
+      val ai = AuthInfo(providerName,uid,name,authToken.value,Some(authToken.secret),Some(nickName))
+      Omniauth.setAuthInfo(ai)
+      logger.debug(ai)
       true
     } catch {
       case e:Exception => logger.debug("Exception= "+e);false;
@@ -125,7 +119,7 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
 }
 
 object TwitterProvider{
-  val providerName = "twitter"
+  val providerName:String = "twitter"
   val providerPropertyKey = "omniauth.twitterkey"
   val providerPropertySecret = "omniauth.twittersecret"
 }
