@@ -1,6 +1,6 @@
 name := "Omniauth"
 
-version := "2.4-M4-0.5"
+version := "2.4-M5-0.5"
 
 organization := "net.liftmodules"
  
@@ -16,7 +16,7 @@ jettyScanDirs := Nil
 resolvers += "databinder.net repository" at "http://databinder.net/repo"
 
 libraryDependencies ++= {
-  val liftVersion = "2.4-M4" 
+  val liftVersion = "2.4-M5" 
   Seq(
     "net.liftweb" %% "lift-webkit" % liftVersion % "compile->default",
 	  "net.databinder" %% "dispatch-core" % "0.8.5",    
