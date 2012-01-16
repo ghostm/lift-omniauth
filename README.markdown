@@ -43,7 +43,7 @@ You can also use obtain a user's unique ID from a provider without using session
 A big thank you to [jonoabroad](https://github.com/jonoabroad) for hosting builds to make using much easier.
 
     libraryDependencies ++= Seq(
-      "net.liftmodules" %% "omniauth" % "2.4-M5-0.5"
+      "net.liftmodules" %% "omniauth" % "2.4-0.5"
     )
 
     resolvers += "Omniauth repo" at "https://repository-liftmodules.forge.cloudbees.com/release"
