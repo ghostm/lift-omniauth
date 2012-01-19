@@ -3,7 +3,7 @@ name := "Omniauth"
 version := "2.4-0.5"
 
 organization := "net.liftmodules"
- 
+scalaHome := Some(file("/opt/scala-2.9.1.final/")) 
 scalaVersion := "2.9.1" 
  
 crossScalaVersions := Seq("2.8.1","2.9.0-1", "2.9.1")
@@ -22,6 +22,7 @@ libraryDependencies ++= {
 	  "net.databinder" %% "dispatch-core" % "0.8.5",    
     "net.databinder" %% "dispatch-http" % "0.8.5",
     "net.databinder" %% "dispatch-oauth" % "0.8.5",    
+    "net.databinder" %% "dispatch-gae" % "0.8.5",    
     "net.databinder" %% "dispatch-http-json" % "0.8.5"
     )
 }
