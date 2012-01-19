@@ -36,10 +36,9 @@ import org.apache.http.message.BasicNameValuePair
 
 
 
-
 object Omniauth  {
   val logger = Logger("omniauth.Omniauth")
-  val http = new Http
+  val http = if (Props.inGAE) { new dispatch.gae.Http } else { new Http } 
   var TwitterHost = :/("api.twitter.com").secure
   val twitterOauthRequest = TwitterHost / "oauth"
 
