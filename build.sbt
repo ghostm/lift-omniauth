@@ -8,11 +8,6 @@ scalaVersion := "2.9.1"
  
 crossScalaVersions := Seq("2.8.1","2.9.0-1", "2.9.1")
 
-seq(com.github.siasia.WebPlugin.webSettings :_*)
-
-// If using JRebel
-jettyScanDirs := Nil
-
 resolvers += "databinder.net repository" at "http://databinder.net/repo"
 
 libraryDependencies ++= {
