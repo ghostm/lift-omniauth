@@ -38,7 +38,7 @@ import org.apache.http.message.BasicNameValuePair
 
 object Omniauth  {
   val logger = Logger("omniauth.Omniauth")
-  val http = if (Props.inGAE) { new dispatch.gae.Http } else { new Http } 
+  val http =  new Http// if (Props.inGAE) { new dispatch.gae.Http } else { new Http }
   var TwitterHost = :/("api.twitter.com").secure
   val twitterOauthRequest = TwitterHost / "oauth"
 
@@ -65,10 +65,13 @@ object Omniauth  {
   
   def setAuthInfo(ai:AuthInfo){authInfo(Full(ai))}
 
+  def clearCurrentAuth = authInfo(Empty)
+
   private def providerListFromProperties():List[OmniauthProvider] = {
     List(getProviderFromProperties(FacebookProvider.providerName, FacebookProvider.providerPropertyKey, FacebookProvider.providerPropertySecret),
     getProviderFromProperties(GithubProvider.providerName, GithubProvider.providerPropertyKey, GithubProvider.providerPropertySecret),
-    getProviderFromProperties(TwitterProvider.providerName, TwitterProvider.providerPropertyKey, TwitterProvider.providerPropertySecret)).flatten(a => a)
+    getProviderFromProperties(TwitterProvider.providerName, TwitterProvider.providerPropertyKey, TwitterProvider.providerPropertySecret),
+    getProviderFromProperties(MSLiveProvider.providerName, MSLiveProvider.providerPropertyKey, MSLiveProvider.providerPropertySecret)).flatten(a => a)
   }
 
   private def getProviderFromProperties(providerName:String, providerKey:String, providerSecret:String):Box[OmniauthProvider] = {
@@ -79,6 +82,7 @@ object Omniauth  {
             case TwitterProvider.providerName => Full(new TwitterProvider(pk, ps))
             case FacebookProvider.providerName => Full(new FacebookProvider(pk, ps))
             case GithubProvider.providerName => Full(new GithubProvider(pk, ps))
+            case MSLiveProvider.providerName => Full(new MSLiveProvider(pk, ps))
             case _ => {
               logger.warn("no provider found for "+providerName)
               Empty
@@ -88,7 +92,7 @@ object Omniauth  {
         case Empty => logger.warn("getProviderFromProperties: empty secret"); Empty
         case Failure(_,_,_) => logger.warn("getProviderFromProperties: fail secret"); Empty
       }
-      case Empty => logger.warn("getProviderFromProperties: empty key"); Empty
+      case Empty => logger.warn("getProviderFromProperties:" + providerKey + " empty key"); Empty
       case Failure(_,_,_) => logger.warn("getProviderFromProperties: fail key"); Empty
     }
   }
@@ -158,4 +162,9 @@ object Omniauth  {
   )
   def q_str (values: Map[String, Any]) = URLEncodedUtils.format(map2ee(values), Request.factoryCharset)
 }
-case class AuthInfo(provider:String,uid:String,name:String,token:String,secret:Option[String] = None,nickName:Option[String] = None)
+case class AuthInfo(provider:String,uid:String,name:String,
+                    token:String,secret:Option[String] = None,
+                    nickName:Option[String] = None,
+                    email:Option[String] = None,
+                     firstName:Option[String]=None,
+                     lastName:Option[String]=None)

@@ -90,8 +90,11 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
 
       val uid =  (json \ "id").extract[String]
       val name =  (json \ "name").extract[String]
-     
-      val ai = AuthInfo(providerName,uid,name,accessToken,Some(secret))
+      val firstName = (json \ "first_name").extract[String]
+      val lastName = (json \ "last_name").extract[String]
+      val email = (json \ "email").extract[String]
+      val ai = AuthInfo(providerName,uid,name,accessToken,Some(secret),
+        Some(name), Some(email), Some(firstName), Some(lastName))
       Omniauth.setAuthInfo(ai)
       logger.debug(ai)
 
