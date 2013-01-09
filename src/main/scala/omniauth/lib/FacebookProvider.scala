@@ -16,7 +16,7 @@
 
 package omniauth.lib
 import omniauth.Omniauth
-import dispatch._
+import dispatch.classic._
 import oauth.{Token, Consumer}
 import json._
 import JsHttp._
@@ -100,7 +100,7 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
 
       true
     } catch {
-      case _ => false
+      case _ : Throwable => false
     }
   }
 
@@ -110,7 +110,7 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
       Full((json \ "id").extract[String])
     } catch {
-      case _ => Empty
+      case _ : Throwable => Empty
     }
   }
 

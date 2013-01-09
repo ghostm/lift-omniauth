@@ -16,7 +16,7 @@
 
 package omniauth.lib
 import omniauth.Omniauth
-import dispatch._
+import dispatch.classic._
 import oauth.{Token, Consumer}
 import json._
 import JsHttp._
@@ -29,7 +29,7 @@ import net.liftweb.json.JsonAST._
 import net.liftweb.http._
 import net.liftweb.sitemap.{Menu, Loc, SiteMap}
 import Loc._
-import dispatch.RequestVerbs
+import dispatch.classic.RequestVerbs
 import omniauth.AuthInfo
 
 
@@ -93,7 +93,7 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
       
       true
     } catch {
-      case _ => false
+      case _ : Throwable => false
     }
   }
 
@@ -103,7 +103,7 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
       Full((json \ "user" \ "id").extract[String])
     } catch {
-      case _ => Empty
+      case _ : Throwable => Empty
     }
   }
 
