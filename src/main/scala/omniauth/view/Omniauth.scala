@@ -15,9 +15,9 @@
  */
 
 package omniauth.view
-import omniauth.Omniauth
+
 import omniauth.lib._
-import dispatch._
+import dispatch.classic._
 import oauth.{ Token, Consumer }
 import json._
 import JsHttp._
@@ -41,8 +41,8 @@ class Omniauth extends LiftView with Loggable {
 
   def doAuthSignin: NodeSeq = {
     logger.debug("doAuthSignin")
-    val provider = S.param("provider") openOr S.redirectTo(Omniauth.failureRedirect)
-    Omniauth.providers.foreach(p => {
+    val provider = S.param("provider") openOr S.redirectTo(omniauth.Omniauth.failureRedirect)
+    omniauth.Omniauth.providers.foreach(p => {
       if (p.providerName.equalsIgnoreCase(provider)) {
         logger.debug("provider match")
         try  { p.signIn } catch  {
@@ -54,19 +54,19 @@ class Omniauth extends LiftView with Loggable {
         
       }
     })
-    S.redirectTo(Omniauth.failureRedirect)
+    S.redirectTo(omniauth.Omniauth.failureRedirect)
   }
 
   def doAuthCallback(): NodeSeq = {
     logger.debug("doAuthCallback")
-    val provider = S.param("provider") openOr S.redirectTo(Omniauth.failureRedirect)
-    Omniauth.providers.foreach(p => {
+    val provider = S.param("provider") openOr S.redirectTo(omniauth.Omniauth.failureRedirect)
+    omniauth.Omniauth.providers.foreach(p => {
       if (p.providerName.equalsIgnoreCase(provider)) {
         logger.debug("provider match")
         p.callback 
       }
     })
-    S.redirectTo(Omniauth.failureRedirect)
+    S.redirectTo(omniauth.Omniauth.failureRedirect)
   }
 
 }

@@ -17,7 +17,7 @@ package omniauth
  */
 
 import omniauth.lib._
-import dispatch._
+import dispatch.classic._
 import oauth.{Token, Consumer}
 import json._
 import JsHttp._

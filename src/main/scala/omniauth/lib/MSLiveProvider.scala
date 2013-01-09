@@ -1,7 +1,7 @@
 package omniauth.lib
 
 import omniauth.Omniauth
-import dispatch._
+import dispatch.classic._
 import oauth.{Token, Consumer}
 import json._
 import JsHttp._
@@ -59,7 +59,7 @@ class MSLiveProvider(val clientId:String, val secret:String) extends OmniauthPro
       val accessTokenString =  (json \ "access_token").extract[String]
       accessTokenString
     } catch {
-      case _ =>
+      case _ : Throwable =>
         logger.debug("didn't find access tokenss")
         S.redirectTo(Omniauth.failureRedirect)
     }
@@ -88,7 +88,7 @@ class MSLiveProvider(val clientId:String, val secret:String) extends OmniauthPro
 
       true
     } catch {
-      case _ => false
+      case _ : Throwable => false
     }
   }
 
@@ -98,7 +98,7 @@ class MSLiveProvider(val clientId:String, val secret:String) extends OmniauthPro
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
       Full((json \ "id").extract[String])
     } catch {
-      case _ => Empty
+      case _ : Throwable => Empty
     }
   }
 
