@@ -40,13 +40,12 @@ You can also use obtain a user's unique ID from a provider without using session
 
 ## Installation
 
-A big thank you to [jonoabroad](https://github.com/jonoabroad) for hosting builds to make using much easier.
+A big thank you to [jonoabroad](https://github.com/jonoabroad) for [hosting builds](https://liftmodules.ci.cloudbees.com/job/Omniauth%20Lift%20Module/) to make using much easier.
 
-    libraryDependencies ++= Seq(
-      "net.liftmodules" %% "omniauth" % "2.4-0.5"
-    )
-
-    resolvers += "Omniauth repo" at "https://repository-liftmodules.forge.cloudbees.com/release"
+    libraryDependencies ++= {
+      val liftVersion = "2.5-M4"
+      Seq( "net.liftmodules" %% "omniauth" % (liftVersion+"-0.7") )
+	}
 
     
 ## Providers
