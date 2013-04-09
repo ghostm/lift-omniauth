@@ -11,7 +11,7 @@ in Boot.scala
     Omniauth.initWithProviders(List(new FacebookProvider("key", "secret")))
     //or init with providers in properties
     OmniauthLib.init
-        
+
 
 in your properties file define your client id (key) and secret for each provider you will use
 
@@ -20,7 +20,7 @@ in your properties file define your client id (key) and secret for each provider
 
 For Facebook provider you can set permissions. For example:
 
-    omniauth.facebookpermissions=email,read_stream    
+    omniauth.facebookpermissions=email,read_stream
 
 After a user has logged into an auth provider you can access data through the session var OmniauthLib.currentAuthMap
 
@@ -42,12 +42,17 @@ You can also use obtain a user's unique ID from a provider without using session
 
 A big thank you to [jonoabroad](https://github.com/jonoabroad) for [hosting builds](https://liftmodules.ci.cloudbees.com/job/Omniauth%20Lift%20Module/) to make using much easier.
 
-    libraryDependencies ++= {
-      val liftVersion = "2.5-M4"
-      Seq( "net.liftmodules" %% "omniauth" % (liftVersion+"-0.7") )
-	}
+To include this module in your Lift project, update your `libraryDependencies` in `build.sbt` to include:
 
-    
+For *Lift 2.5.x* (Scala 2.9 and 2.10):
+
+    "net.liftmodules" %% "omniauth_2.5" % "0.7"
+
+For *Lift 3.0.x* (Scala 2.10):
+
+    "net.liftmodules" %% "omniauth_3.0" % "0.7-SNAPSHOT"
+
+
 ## Providers
 
 Lift-OmniAuth currently supports the following external providers:

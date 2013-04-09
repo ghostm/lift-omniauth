@@ -1,13 +1,17 @@
 name := "Omniauth"
 
-liftVersion <<= liftVersion ?? "2.5-SNAPSHOT"
-
-version <<= liftVersion apply { _ + "-0.7-SNAPSHOT" }
-
 organization := "net.liftmodules"
 
-scalaVersion := "2.10.0" 
- 
+version := "0.7-SNAPSHOT"
+
+liftVersion <<= liftVersion ?? "2.5-SNAPSHOT"
+
+liftEdition <<= liftVersion apply { _.substring(0,3) }
+
+name <<= (name, liftEdition) { (n, e) =>  n + "_" + e }
+
+scalaVersion := "2.10.0"
+
 crossScalaVersions := Seq("2.10.0", "2.9.2", "2.9.1-1", "2.9.1")
 
 resolvers += "CB Central Mirror" at "http://repo.cloudbees.com/content/groups/public"
@@ -15,11 +19,11 @@ resolvers += "CB Central Mirror" at "http://repo.cloudbees.com/content/groups/pu
 resolvers += "Sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies <++= liftVersion { v =>
-  Seq("net.liftweb"   %% "lift-webkit"  % v  % "compile->default",
-	    "net.databinder" %% "dispatch-core" % "0.8.9",    
+  Seq("net.liftweb"   %% "lift-webkit"  % v  % "provided",
+	    "net.databinder" %% "dispatch-core" % "0.8.9",
       "net.databinder" %% "dispatch-http" % "0.8.9",
-      "net.databinder" %% "dispatch-oauth" % "0.8.9",    
-  	  "net.databinder" %% "dispatch-gae" % "0.8.9",    
+      "net.databinder" %% "dispatch-oauth" % "0.8.9",
+  	  "net.databinder" %% "dispatch-gae" % "0.8.9",
       "net.databinder" %% "dispatch-http-json" % "0.8.9"
     )
 }
@@ -30,7 +34,7 @@ publishTo <<= version { _.endsWith("SNAPSHOT") match {
         case true  => Some("snapshots" at "https://oss.sonatype.org/content/repositories/snapshots")
         case false => Some("releases" at "https://oss.sonatype.org/service/local/staging/deploy/maven2")
   }
- } 
+ }
 
 credentials += Credentials( file("sonatype.credentials") )
 
@@ -61,5 +65,5 @@ pomExtra := (
               <name>Matthew Henderson</name>
               <url>https://github.com/ghostm</url>
             </developer>
-         </developers> 
+         </developers>
  )
