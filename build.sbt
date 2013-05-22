@@ -18,8 +18,7 @@ libraryDependencies <++= liftVersion { v =>
   Seq("net.liftweb"   %% "lift-webkit"  % v  % "compile->default",
 	    "net.databinder" %% "dispatch-core" % "0.8.9",    
       "net.databinder" %% "dispatch-http" % "0.8.9",
-      "net.databinder" %% "dispatch-oauth" % "0.8.9",    
-  	  "net.databinder" %% "dispatch-gae" % "0.8.9",    
+      "net.databinder" %% "dispatch-oauth" % "0.8.9",       
       "net.databinder" %% "dispatch-http-json" % "0.8.9"
     )
 }

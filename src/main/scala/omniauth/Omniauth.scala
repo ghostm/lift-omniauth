@@ -34,11 +34,18 @@ import net.liftweb.common._
 import org.apache.http.client.utils.URLEncodedUtils
 import org.apache.http.message.BasicNameValuePair
 
+object Omniauth extends Omniauth
 
-
-object Omniauth  {
+trait Omniauth  {
   val logger = Logger("omniauth.Omniauth")
-  val http =  new Http// if (Props.inGAE) { new dispatch.gae.Http } else { new Http }
+
+ /**
+  * If in GAE, add dependency to net.databinder:dispatch-gae and override this.
+  *  {{{
+  *      if (Props.inGAE) { new dispatch.gae.Http } else { new Http } 
+  *  }}}
+  */
+  val http =  new Http
   var TwitterHost = :/("api.twitter.com").secure
   val twitterOauthRequest = TwitterHost / "oauth"
 
