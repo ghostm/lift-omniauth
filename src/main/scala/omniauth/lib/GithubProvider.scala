@@ -17,19 +17,11 @@
 package omniauth.lib
 import omniauth.Omniauth
 import dispatch.classic._
-import oauth.{Token, Consumer}
-import json._
-import JsHttp._
-import oauth._
-import oauth.OAuth._
 import xml.{Text, NodeSeq}
 import net.liftweb.common.{Full, Empty, Box}
-import net.liftweb.json.JsonParser
-import net.liftweb.json.JsonAST._
+import net.liftweb.util.Helpers._
+import net.liftweb.json._
 import net.liftweb.http._
-import net.liftweb.sitemap.{Menu, Loc, SiteMap}
-import Loc._
-import dispatch.classic.RequestVerbs
 import omniauth.AuthInfo
 
 
@@ -80,14 +72,25 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
   }
 
   def validateToken(accessToken:String): Boolean = {
-    val tempRequest = :/("github.com").secure / "api/v2/json/user/show" <<? Map("access_token" -> accessToken)
+    val tempRequest = :/("api.github.com").secure / "user" <<? Map("access_token" -> accessToken)
     try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
       
-      val uid =  (json \ "user" \ "id").extract[String]
-      val name =  (json \ "user" \ "name").extract[String]
-      
-      val ai = AuthInfo(providerName,uid,name,accessToken)
+      val uid =  (json \ "id").extract[String]
+      val name =  (json \ "name").extract[String]
+      val _email = json \ "email"
+      val email =   ( _email == JNull ) ? None |  _email.extractOpt[String] //To avoid getting email = Some(null)
+      val username =  (json \ "login").extractOpt[String]
+
+      val ai =
+        AuthInfo(
+          provider = providerName,
+          uid = uid,
+          name = name,
+          email = email,
+          nickName = username,
+          token = accessToken
+        )
       Omniauth.setAuthInfo(ai)
       logger.debug(ai)     
       
@@ -98,10 +101,10 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
   }
 
   def tokenToId(accessToken:String): Box[String] = {
-    val tempRequest = :/("github.com").secure / "api/v2/json/user/show" <<? Map("access_token" -> accessToken)
+    val tempRequest = :/("api.github.com").secure / "user" <<? Map("access_token" -> accessToken)
     try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
-      Full((json \ "user" \ "id").extract[String])
+      Full((json \ "id").extract[String])
     } catch {
       case _ : Throwable => Empty
     }
