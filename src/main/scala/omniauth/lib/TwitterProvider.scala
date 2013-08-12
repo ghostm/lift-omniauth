@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 Matthew Henderson
+ * Copyright 2010-2013 Matthew Henderson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
 
   def signIn(): NodeSeq = doTwitterSignin
   def callback(): NodeSeq = doTwitterCallback
+  implicit val formats = net.liftweb.json.DefaultFormats
 
   val consumer = Consumer(key, secret)
 
@@ -83,13 +84,13 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
     }
     val authToken = Token(tokenParts(0), tokenParts(1))
     logger.debug("authToken "+authToken)
-    var verifyCreds = Omniauth.TwitterHost / "1/account/verify_credentials.xml" <@ (consumer, authToken)
+    val verifyCreds = Omniauth.TwitterHost / "1.1/account/verify_credentials.json" <@ (consumer, authToken)
     try{
-      val tempResponse = Omniauth.http(verifyCreds <> { _ \\ "user" })
+      val json = Omniauth.http(verifyCreds >- JsonParser.parse)
 
-      val uid = (tempResponse \ "id").text
-      val name = (tempResponse \ "name").text
-      val nickName = (tempResponse \ "screen_name").text
+      val uid = (json \ "id").extract[String]
+      val name = (json \ "name").extract[String]
+      val nickName = (json \ "screen_name").extract[String]
 
       val ai = AuthInfo(providerName,uid,name,authToken.value,Some(authToken.secret),Some(nickName))
       Omniauth.setAuthInfo(ai)
@@ -108,10 +109,10 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
     }
     val authToken = Token(tokenParts(0), tokenParts(1))
     logger.debug("authToken "+authToken)
-    var verifyCreds = Omniauth.TwitterHost / "1/account/verify_credentials.xml" <@ (consumer, authToken)
+    val verifyCreds = Omniauth.TwitterHost / "1.1/account/verify_credentials.json" <@ (consumer, authToken)
     try{
-      var tempResponse = Omniauth.http(verifyCreds <> { _ \\ "user" })
-      Full((tempResponse \ "id").text)
+      val json = Omniauth.http(verifyCreds >- JsonParser.parse)
+      (json \ "id").extractOpt[String]
     }catch {
       case e:Exception => logger.debug("Exception= "+e);Empty;
     }
