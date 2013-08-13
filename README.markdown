@@ -10,7 +10,7 @@ in Boot.scala
     //Supply a list of providers
     Omniauth.initWithProviders(List(new FacebookProvider("key", "secret")))
     //or init with providers in properties
-    OmniauthLib.init
+    Omniauth.init
 
 
 in your properties file define your client id (key) and secret for each provider you will use
