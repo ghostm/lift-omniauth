@@ -13,23 +13,29 @@ in Boot.scala
     Omniauth.init
 
 
-in your properties file define your client id (key) and secret for each provider you will use
+in your props file(s) define your client id (key) and secret for each provider you will use
 
     omniauth.facebooksecret=...
     omniauth.facebookkey=...
+    
+set the base URL for your application
+
+    omniauth.baseurl=http://localhost:8080/
+
+set the success and failure URLs
+
+    omniauth.successurl=/
+    omniauth.failureurl=/error
 
 For Facebook provider you can set permissions. For example:
 
     omniauth.facebookpermissions=email,read_stream
 
-After a user has logged into an auth provider you can access data through the session var OmniauthLib.currentAuthMap
+After a user has logged into an auth provider you can access data through the session var Omniauth.currentAuth
 
-    OmniauthLib.currentAuthMap match {
-      case Full(omni) => ({
-        println(omni.get(OmniauthLib.Provider))
-        println(omni.get(OmniauthLib.UID))
-        println(omni.get(OmniauthLib.UserInfo))
-      })
+    Omniauth.currentAuth match {
+      case Full(auth:AuthInfo) => 
+      case _ =>
     }
 
 You can also use obtain a user's unique ID from a provider without using sessions using Omniauth.tokenToId(provider:String, token:String): Box[String]
@@ -37,6 +43,11 @@ You can also use obtain a user's unique ID from a provider without using session
     Omniauth.tokenToId("facebook", token) match {
       case Full(uid) => user.doSomethingWithFacebookId(uid)
     }
+
+Finally, send the user to the auth URL.
+
+    S.redirectTo("/auth/facebook/signin")
+    
 
 ## Installation
 
