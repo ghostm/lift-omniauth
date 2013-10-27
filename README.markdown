@@ -61,3 +61,5 @@ Lift-OmniAuth currently supports the following external providers:
   * Facebook
   * Twitter
   * Github
+  * MSLive
+  * Dropbox

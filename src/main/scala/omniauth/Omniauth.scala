@@ -78,7 +78,9 @@ trait Omniauth  {
     List(getProviderFromProperties(FacebookProvider.providerName, FacebookProvider.providerPropertyKey, FacebookProvider.providerPropertySecret),
     getProviderFromProperties(GithubProvider.providerName, GithubProvider.providerPropertyKey, GithubProvider.providerPropertySecret),
     getProviderFromProperties(TwitterProvider.providerName, TwitterProvider.providerPropertyKey, TwitterProvider.providerPropertySecret),
-    getProviderFromProperties(MSLiveProvider.providerName, MSLiveProvider.providerPropertyKey, MSLiveProvider.providerPropertySecret)).flatten(a => a)
+    getProviderFromProperties(MSLiveProvider.providerName, MSLiveProvider.providerPropertyKey, MSLiveProvider.providerPropertySecret),
+    getProviderFromProperties(DropboxProvider.providerName, DropboxProvider.providerPropertyKey, DropboxProvider.providerPropertySecret)
+    ).flatten(a => a)
   }
 
   private def getProviderFromProperties(providerName:String, providerKey:String, providerSecret:String):Box[OmniauthProvider] = {
@@ -90,6 +92,7 @@ trait Omniauth  {
             case FacebookProvider.providerName => Full(new FacebookProvider(pk, ps))
             case GithubProvider.providerName => Full(new GithubProvider(pk, ps))
             case MSLiveProvider.providerName => Full(new MSLiveProvider(pk, ps))
+            case DropboxProvider.providerName => Full(new DropboxProvider(pk, ps))
             case _ => {
               logger.warn("no provider found for "+providerName)
               Empty
