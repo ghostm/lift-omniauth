@@ -4,15 +4,15 @@ organization := "net.liftmodules"
 
 version := "0.7-SNAPSHOT"
 
-liftVersion <<= liftVersion ?? "2.6-SNAPSHOT"
+liftVersion <<= liftVersion ?? "2.5.1"
 
 liftEdition <<= liftVersion apply { _.substring(0,3) }
 
 name <<= (name, liftEdition) { (n, e) =>  n + "_" + e }
 
-scalaVersion := "2.10.0"
+scalaVersion := "2.9.3"
 
-crossScalaVersions := Seq("2.10.0", "2.9.2", "2.9.1-1", "2.9.1")
+crossScalaVersions := Seq("2.10.3", "2.9.3", "2.9.2", "2.9.1-1", "2.9.1")
 
 resolvers += "CB Central Mirror" at "http://repo.cloudbees.com/content/groups/public"
 
@@ -20,7 +20,7 @@ resolvers += "Sonatype snapshots" at "http://oss.sonatype.org/content/repositori
 
 libraryDependencies <++= liftVersion { v =>
   Seq("net.liftweb"   %% "lift-webkit"  % v  % "provided",
-	    "net.databinder" %% "dispatch-core" % "0.8.9",
+      "net.databinder" %% "dispatch-core" % "0.8.9",
       "net.databinder" %% "dispatch-http" % "0.8.9",
       "net.databinder" %% "dispatch-oauth" % "0.8.9",
       "net.databinder" %% "dispatch-http-json" % "0.8.9"
