@@ -94,7 +94,7 @@ class DropboxProvider (val key:String, val secret:String) extends OmniauthProvid
   def accountInfo(token:String) = {
     val req = :/("api.dropbox.com").secure / "1/account/info" << Map(
       "locale" -> S.locale.getLanguage()) <:< Map(
-      "Authorization" -> s"Bearer $token")
+      "Authorization" -> ("Bearer "+token))
 
     val res = Omniauth.http(req >- JsonParser.parse)
     val name = (res \ "display_name").extract[String]
