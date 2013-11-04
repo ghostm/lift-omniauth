@@ -9,7 +9,7 @@ import json.JsonParser
 
 import scala.xml.NodeSeq
 
-import java.security.SecureRandom 
+import java.security.SecureRandom
 
 import dispatch.classic._
 
@@ -56,13 +56,25 @@ class DropboxProvider (val key:String, val secret:String) extends OmniauthProvid
           val tokenType = (res \ "token_type").extract[String]
           val uid       = (res \ "uid").extract[String]
           
-          if(validateToken(token)) S.redirectTo(Omniauth.successRedirect)
-          else S.redirectTo(Omniauth.failureRedirect)
+          if(validateToken(token)) {
+            logger.debug("token validated")
+            S.redirectTo(Omniauth.successRedirect)
+          }
+          else {
+            logger.debug("token did not validate")
+            S.redirectTo(Omniauth.failureRedirect)
+          }
         }
-        case _ => S.redirectTo(Omniauth.failureRedirect)
+        case _ => {
+          logger.debug("code was not returned from Dropbox")
+          S.redirectTo(Omniauth.failureRedirect)
+        }
 
       }
-    } else S.redirectTo(Omniauth.failureRedirect)
+    } else {
+      logger.debug("state did not match")
+      S.redirectTo(Omniauth.failureRedirect)
+    }
     
     NodeSeq.Empty
   }
