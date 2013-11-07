@@ -80,7 +80,8 @@ trait Omniauth  {
     getProviderFromProperties(TwitterProvider.providerName, TwitterProvider.providerPropertyKey, TwitterProvider.providerPropertySecret),
     getProviderFromProperties(MSLiveProvider.providerName, MSLiveProvider.providerPropertyKey, MSLiveProvider.providerPropertySecret),
     getProviderFromProperties(DropboxProvider.providerName, DropboxProvider.providerPropertyKey, DropboxProvider.providerPropertySecret),
-    getProviderFromProperties(GoogleProvider.providerName, GoogleProvider.providerPropertyKey, GoogleProvider.providerPropertySecret)
+    getProviderFromProperties(GoogleProvider.providerName, GoogleProvider.providerPropertyKey, GoogleProvider.providerPropertySecret),
+    getProviderFromProperties(LinkedinProvider.providerName, LinkedinProvider.providerPropertyKey, LinkedinProvider.providerPropertySecret)
     ).flatten(a => a)
   }
 
@@ -95,6 +96,7 @@ trait Omniauth  {
             case MSLiveProvider.providerName => Full(new MSLiveProvider(pk, ps))
             case DropboxProvider.providerName => Full(new DropboxProvider(pk, ps))
             case GoogleProvider.providerName => Full(new GoogleProvider(pk, ps))
+            case LinkedinProvider.providerName => Full(new LinkedinProvider(pk, ps))
             case _ => {
               logger.warn("no provider found for "+providerName)
               Empty
