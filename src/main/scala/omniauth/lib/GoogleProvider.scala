@@ -14,11 +14,6 @@ import net.liftweb.util.Helpers._
  * Date: 11/6/13
  * Time: 8:11 PM
  */
-case class AccessToken(access_token: String,
-                       token_type: String,
-                       expires_in: Int,
-                       id_token: String)
-
 class GoogleProvider(val clientId:String, val secret:String) extends OmniauthProvider{
   def providerName = GoogleProvider.providerName
   def providerPropertyKey = GoogleProvider.providerPropertyKey
@@ -57,7 +52,8 @@ class GoogleProvider(val clientId:String, val secret:String) extends OmniauthPro
     val tempRequest = (:/("accounts.google.com").secure / "o" / "oauth2" / "token").POST <:<
       Map("Content-Type" -> "application/x-www-form-urlencoded")<< urlParameters
 
-    val accessTokenString = tryo(JsonParser.parse(Omniauth.http(tempRequest as_str)).extract[AccessToken].access_token)
+    val json = Omniauth.http(tempRequest >-JsonParser.parse)
+    val accessTokenString = tryo((json \ "access_token").extract[String])
 
     (for {
       t <- accessTokenString
