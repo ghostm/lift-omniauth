@@ -18,12 +18,34 @@ package omniauth.lib
 
 import xml.NodeSeq
 import net.liftweb.common.{Box,Loggable}
+import net.liftweb.http.S
+import omniauth.Omniauth
 
+case class AuthToken(token: String,
+                     expiresIn: Option[Long],
+                     refreshToken: Option[String],
+                     secret: Option[String])
 
 abstract class OmniauthProvider extends Loggable {
   def providerName: String
   def signIn(): NodeSeq
   def callback(): NodeSeq
-  def validateToken(token:String): Boolean
-  def tokenToId(token:String): Box[String]  
+  def validateToken(token: AuthToken): Boolean
+  def tokenToId(token:AuthToken): Box[String]
+
+  protected def extractToken(resp: String) = {
+    if (resp.startsWith("access_token=")) {
+      var accessToken = resp.stripPrefix("access_token=")
+      val ampIndex = accessToken.indexOf("&")
+
+      if (ampIndex >= 0) {
+        accessToken = accessToken.take(ampIndex)
+      }
+
+      AuthToken(accessToken, None, None, None)
+    } else {
+      logger.debug("didn't find access token")
+      S.redirectTo(Omniauth.failureRedirect)
+    }
+  }
 }

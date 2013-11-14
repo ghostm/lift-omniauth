@@ -153,7 +153,7 @@ trait Omniauth  {
   lazy val sitemap: List[Menu] =
     List(callbackMenuLoc, signinMenuLoc).flatten(a => a)
 
-  def validateToken(provider:String, token:String): Boolean = {
+  def validateToken(provider:String, token:AuthToken): Boolean = {
     Omniauth.providers.foreach(p => {
       if(p.providerName.equalsIgnoreCase(provider)){
         return p.validateToken(token)
@@ -162,7 +162,7 @@ trait Omniauth  {
     false
   }
 
-  def tokenToId(provider:String, token:String): Box[String] = {
+  def tokenToId(provider:String, token:AuthToken): Box[String] = {
     Omniauth.providers.foreach(p => {
       if(p.providerName.equalsIgnoreCase(provider)){
         return p.tokenToId(token)
@@ -176,9 +176,12 @@ trait Omniauth  {
   )
   def q_str (values: Map[String, Any]) = URLEncodedUtils.format(map2ee(values), Request.factoryCharset)
 }
-case class AuthInfo(provider:String,uid:String,name:String,
-                    token:String,secret:Option[String] = None,
+case class AuthInfo(provider:String,
+                    uid:String,
+                    name:String,
+                    token:AuthToken,
+                    secret:Option[String] = None,
                     nickName:Option[String] = None,
                     email:Option[String] = None,
-                     firstName:Option[String]=None,
-                     lastName:Option[String]=None)
+                    firstName:Option[String]=None,
+                    lastName:Option[String]=None)

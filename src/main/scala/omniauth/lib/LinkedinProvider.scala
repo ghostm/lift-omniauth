@@ -54,20 +54,24 @@ class LinkedinProvider(val clientId:String, val secret:String) extends OmniauthP
 
     val tempRequest = (:/("www.linkedin.com").secure / "uas" / "oauth2" / "accessToken").POST << urlParameters
 
-
-    val str = Omniauth.http(tempRequest as_str)
     val json = Omniauth.http(tempRequest >-JsonParser.parse)
-    val accessTokenString = tryo((json \ "access_token").extract[String])
-
+    val accessToken = tryo {
+      AuthToken(
+        (json \ "access_token").extract[String],
+        (json \ "expires_in").extract[Option[Long]],
+        None,
+        None
+      )
+    }
     (for {
-      t <- accessTokenString
+      t <- accessToken
       if validateToken(t)
     } yield { S.redirectTo(Omniauth.successRedirect) }) openOr S.redirectTo(Omniauth.failureRedirect)
   }
 
-  def validateToken(accessToken:String): Boolean = {
+  def validateToken(accessToken:AuthToken): Boolean = {
    val tempRequest = :/("api.linkedin.com").secure / "v1" / "people" / "~:(id,first-name,last-name,email-address)" <<?
-     ("oauth2_access_token", accessToken) :: Nil
+     ("oauth2_access_token", accessToken.token) :: Nil
 
     try{
       val xml = Omniauth.http(tempRequest >- XML.loadString)
@@ -88,9 +92,10 @@ class LinkedinProvider(val clientId:String, val secret:String) extends OmniauthP
     }
   }
 
-  def tokenToId(accessToken:String): Box[String] = {
+  def tokenToId(accessToken:AuthToken): Box[String] = {
 
-    val tempRequest = :/("api.linkedin.com").secure / "v1" / "people" / "~" / "id" <<? Map("access_token" -> accessToken)
+    val tempRequest = :/("api.linkedin.com").secure / "v1" / "people" / "~" / "id" <<?
+      Map("access_token" -> accessToken.token)
 
     try{
       val xml = Omniauth.http(tempRequest >- XML.loadString)
