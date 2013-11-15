@@ -23,6 +23,8 @@ class LinkedinProvider(val clientId:String, val secret:String) extends OmniauthP
   def linkedinPermissions =
     Props.get("omniauth.linkedinpermissions") openOr "r_emailaddress,r_basicprofile"
 
+  def linkedinFields = Props.get("omniauth.linkedinfields") openOr "id,first-name,last-name,email-address"
+
   def signIn():NodeSeq = doLinkedinSignin
   def callback(): NodeSeq = doLinkedinCallback
   implicit val formats = net.liftweb.json.DefaultFormats
@@ -70,27 +72,25 @@ class LinkedinProvider(val clientId:String, val secret:String) extends OmniauthP
     }
   }
 
-  def validateToken(accessToken:AuthToken): Boolean = {
-   val tempRequest = :/("api.linkedin.com").secure / "v1" / "people" / "~:(id,first-name,last-name,email-address)" <<?
-     ("oauth2_access_token", accessToken.token) :: Nil
+  def validateToken(accessToken: AuthToken): Boolean = {
+    val urlParameters = Map("oauth2_access_token" -> accessToken.token,
+      "format" -> "json")
+    val profile = "~:(" + linkedinFields + ")"
+    val tempRequest = :/("api.linkedin.com").secure / "v1" / "people" / profile <<? urlParameters
 
-    try{
-      val xml = Omniauth.http(tempRequest >- XML.loadString)
+    val json = Omniauth.http(tempRequest >- JsonParser.parse)
 
-      val uid =  (xml \ "id").text
-      val firstName = (xml \ "first-name").text
-      val lastName = (xml \ "last-name").text
-      val name =  firstName + " " +lastName
-      val email = (xml \ "email").text
-      val ai = AuthInfo(providerName,uid,name,accessToken,Some(secret),
-        Some(name), Some(email), Some(firstName), Some(lastName))
-      Omniauth.setAuthInfo(ai)
-      logger.debug(ai)
+    val uid = (json \ "id").extract[String]
+    val firstName = (json \ "firstName").extract[String]
+    val lastName = (json \ "lastName").extract[String]
+    val name = firstName + " " + lastName
+    val email = (json \ "emailAddress").extract[String]
+    val ai = AuthInfo(providerName, uid, name, accessToken, Some(secret),
+      Some(name), Some(email), Some(firstName), Some(lastName))
+    Omniauth.setAuthInfo(ai)
+    logger.debug(ai)
 
-      true
-    } catch {
-      case _ : Throwable => false
-    }
+    true
   }
 
   def tokenToId(accessToken:AuthToken): Box[String] = {
