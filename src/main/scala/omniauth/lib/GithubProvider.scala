@@ -23,13 +23,19 @@ import net.liftweb.util.Helpers._
 import net.liftweb.json._
 import net.liftweb.http._
 import omniauth.AuthInfo
+import java.util.UUID
+import net.liftweb.util.Props
 
 
 class GithubProvider(val clientId:String, val secret:String) extends OmniauthProvider{
+  private val state = UUID.randomUUID().toString
+  
   def providerName = GithubProvider.providerName
   def providerPropertyKey = GithubProvider.providerPropertyKey
   def providerPropertySecret = GithubProvider.providerPropertySecret
 
+  private val  githubScope =  Props.get("omniauth.github.scope") openOr ""
+  
   def signIn():NodeSeq = doGithubSignin
   def callback(): NodeSeq = doGithubCallback
   implicit val formats = net.liftweb.json.DefaultFormats
@@ -40,11 +46,14 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
     var urlParameters = Map[String, String]()
     urlParameters += ("client_id" -> clientId)
     urlParameters += ("redirect_uri" -> callbackUrl)
+    urlParameters += ("state" -> state)    
+    urlParameters += ("scope" -> githubScope)        
     requestUrl += Omniauth.q_str(urlParameters)
     S.redirectTo(requestUrl)
   }
 
   def doGithubCallback () : NodeSeq = {
+    if (S.param("state") map {_ != state} openOr true ) S.redirectTo("/") 
     val ghCode = S.param("code") openOr S.redirectTo("/")
     val callbackUrl = Omniauth.siteAuthBaseUrl+"auth/"+providerName+"/callback"
     var urlParameters = Map[String, String]()
