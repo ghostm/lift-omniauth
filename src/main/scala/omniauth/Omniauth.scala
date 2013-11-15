@@ -18,16 +18,9 @@ package omniauth
 
 import omniauth.lib._
 import dispatch.classic._
-import oauth.{Token, Consumer}
-import json._
-import JsHttp._
 import oauth._
-import oauth.OAuth._
-import xml.{Text, NodeSeq}
-import net.liftweb.json.JsonParser
-import net.liftweb.json.JsonAST._
 import net.liftweb.http._
-import net.liftweb.sitemap.{Menu, Loc, SiteMap}
+import net.liftweb.sitemap.{Menu, Loc}
 import Loc._
 import net.liftweb.util.Props
 import net.liftweb.common._

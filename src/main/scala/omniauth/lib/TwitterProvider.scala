@@ -17,19 +17,12 @@
 package omniauth.lib
 import omniauth.Omniauth
 import dispatch.classic._
-import oauth.{Token, Consumer}
-import json._
-import JsHttp._
 import oauth._
 import oauth.OAuth._
-import twitter.{Auth}
-import xml.{Text, NodeSeq}
-import net.liftweb.common.{Full, Empty, Box}
+import twitter.Auth
+import xml.NodeSeq
 import net.liftweb.json.JsonParser
-import net.liftweb.json.JsonAST._
 import net.liftweb.http._
-import net.liftweb.sitemap.{Menu, Loc, SiteMap}
-import Loc._
 import net.liftweb.common._
 import omniauth.AuthInfo
 import net.liftweb.util.Helpers._

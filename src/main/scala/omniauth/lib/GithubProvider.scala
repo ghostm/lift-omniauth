@@ -17,7 +17,7 @@
 package omniauth.lib
 import omniauth.Omniauth
 import dispatch.classic._
-import xml.{Text, NodeSeq}
+import xml.NodeSeq
 import net.liftweb.common.{Full, Empty, Box}
 import net.liftweb.util.Helpers._
 import net.liftweb.json._

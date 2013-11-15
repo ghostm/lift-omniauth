@@ -9,7 +9,6 @@ import net.liftweb.util.Helpers._
 import scala.Some
 import net.liftweb.json.JsonParser
 import net.liftweb.common.{Empty, Full, Box}
-import java.util.UUID
 
 /**
  * User: ggarcia

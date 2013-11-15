@@ -7,9 +7,6 @@ import common._
 import http.S
 import json.JsonParser
 
-import scala.xml.NodeSeq
-
-import java.security.SecureRandom
 
 import dispatch.classic._
 
