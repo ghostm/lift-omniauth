@@ -16,14 +16,7 @@ import dispatch.classic._
 class DropboxProvider (val key:String, val secret:String) extends OmniauthProvider{
   implicit val formats = net.liftweb.json.DefaultFormats
   def providerName = DropboxProvider.providerName
-  
-  val csrf = {
-    val bs:Array[Byte] = (1 to 16).map(_.asInstanceOf[Byte]).toArray
-    val r = SecureRandom.getInstance("SHA1PRNG", "SUN")
-    r.nextBytes(bs)
-    bs.map(Integer.toHexString(_)).reduce(_ + _)
-  }
-  
+
   def callbackUrl = Omniauth.siteAuthBaseUrl+"auth/"+providerName+"/callback"
   
   def signIn() = {
@@ -38,9 +31,7 @@ class DropboxProvider (val key:String, val secret:String) extends OmniauthProvid
   }
   
   def callback() = {
-    val state = S.param("state") openOr ""
-    
-    if(csrf == state) {
+    execWithStateValidation {
       S.param("code") match {
         case Full(code) => {
           val req = :/("api.dropbox.com").secure / "1/oauth2/token" << Map(
@@ -74,12 +65,7 @@ class DropboxProvider (val key:String, val secret:String) extends OmniauthProvid
         }
 
       }
-    } else {
-      logger.debug("state did not match")
-      S.redirectTo(Omniauth.failureRedirect)
     }
-    
-    NodeSeq.Empty
   }
   
   def validateToken(token: AuthToken) = {

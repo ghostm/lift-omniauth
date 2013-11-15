@@ -37,36 +37,38 @@ class LinkedinProvider(val clientId:String, val secret:String) extends OmniauthP
     urlParameters += ("scope" -> linkedinPermissions)
     urlParameters += ("response_type" -> "code")
     urlParameters += ("scope" -> linkedinPermissions)
-    urlParameters += ("state" -> UUID.randomUUID.toString.replaceAll("-", ""))
+    urlParameters += ("state" -> csrf)
     requestUrl += Omniauth.q_str(urlParameters)
     S.redirectTo(requestUrl)
   }
 
   def doLinkedinCallback () : NodeSeq = {
-    val ggCode = S.param("code") openOr S.redirectTo("/")
-    val callbackUrl = Omniauth.siteAuthBaseUrl+"auth/"+providerName+"/callback"
-    var urlParameters = Map[String, String]()
-    urlParameters += ("client_id" -> clientId)
-    urlParameters += ("redirect_uri" -> callbackUrl)
-    urlParameters += ("client_secret" -> secret)
-    urlParameters += ("grant_type" -> "authorization_code")
-    urlParameters += ("code" -> ggCode.toString)
+    execWithStateValidation {
+      val ggCode = S.param("code") openOr S.redirectTo("/")
+      val callbackUrl = Omniauth.siteAuthBaseUrl+"auth/"+providerName+"/callback"
+      var urlParameters = Map[String, String]()
+      urlParameters += ("client_id" -> clientId)
+      urlParameters += ("redirect_uri" -> callbackUrl)
+      urlParameters += ("client_secret" -> secret)
+      urlParameters += ("grant_type" -> "authorization_code")
+      urlParameters += ("code" -> ggCode.toString)
 
-    val tempRequest = (:/("www.linkedin.com").secure / "uas" / "oauth2" / "accessToken").POST << urlParameters
+      val tempRequest = (:/("www.linkedin.com").secure / "uas" / "oauth2" / "accessToken").POST << urlParameters
 
-    val json = Omniauth.http(tempRequest >-JsonParser.parse)
-    val accessToken = tryo {
-      AuthToken(
-        (json \ "access_token").extract[String],
-        (json \ "expires_in").extract[Option[Long]],
-        None,
-        None
-      )
+      val json = Omniauth.http(tempRequest >-JsonParser.parse)
+      val accessToken = tryo {
+        AuthToken(
+          (json \ "access_token").extract[String],
+          (json \ "expires_in").extract[Option[Long]],
+          None,
+          None
+        )
+      }
+      (for {
+        t <- accessToken
+        if validateToken(t)
+      } yield { S.redirectTo(Omniauth.successRedirect) }) openOr S.redirectTo(Omniauth.failureRedirect)
     }
-    (for {
-      t <- accessToken
-      if validateToken(t)
-    } yield { S.redirectTo(Omniauth.successRedirect) }) openOr S.redirectTo(Omniauth.failureRedirect)
   }
 
   def validateToken(accessToken:AuthToken): Boolean = {

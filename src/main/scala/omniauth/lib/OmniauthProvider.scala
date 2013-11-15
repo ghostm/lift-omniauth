@@ -20,6 +20,7 @@ import xml.NodeSeq
 import net.liftweb.common.{Box,Loggable}
 import net.liftweb.http.S
 import omniauth.Omniauth
+import java.security.SecureRandom
 
 case class AuthToken(token: String,
                      expiresIn: Option[Long],
@@ -32,6 +33,13 @@ abstract class OmniauthProvider extends Loggable {
   def callback(): NodeSeq
   def validateToken(token: AuthToken): Boolean
   def tokenToId(token:AuthToken): Box[String]
+
+  val csrf = {
+    val bs:Array[Byte] = (1 to 16).map(_.asInstanceOf[Byte]).toArray
+    val r = SecureRandom.getInstance("SHA1PRNG", "SUN")
+    r.nextBytes(bs)
+    bs.map(Integer.toHexString(_)).reduce(_ + _)
+  }
 
   protected def extractToken(resp: String) = {
     if (resp.startsWith("access_token=")) {
@@ -47,5 +55,18 @@ abstract class OmniauthProvider extends Loggable {
       logger.debug("didn't find access token")
       S.redirectTo(Omniauth.failureRedirect)
     }
+  }
+
+  protected def execWithStateValidation(f: () => Unit) = {
+    val state = S.param("state") openOr ""
+
+    if(csrf == state) {
+      f()
+    } else {
+      logger.debug("state did not match")
+      S.redirectTo(Omniauth.failureRedirect)
+    }
+
+    NodeSeq.Empty
   }
 }

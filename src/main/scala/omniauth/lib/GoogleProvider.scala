@@ -41,32 +41,34 @@ class GoogleProvider(val clientId:String, val secret:String) extends OmniauthPro
   }
 
   def doGoogleCallback () : NodeSeq = {
-    val ggCode = S.param("code") openOr S.redirectTo("/")
-    val callbackUrl = Omniauth.siteAuthBaseUrl+"auth/"+providerName+"/callback"
-    var urlParameters = Map[String, String]()
-    urlParameters += ("client_id" -> clientId)
-    urlParameters += ("redirect_uri" -> callbackUrl)
-    urlParameters += ("client_secret" -> secret)
-    urlParameters += ("grant_type" -> "authorization_code")
-    urlParameters += ("code" -> ggCode.toString)
+    execWithStateValidation {
+      val ggCode = S.param("code") openOr S.redirectTo("/")
+      val callbackUrl = Omniauth.siteAuthBaseUrl+"auth/"+providerName+"/callback"
+      var urlParameters = Map[String, String]()
+      urlParameters += ("client_id" -> clientId)
+      urlParameters += ("redirect_uri" -> callbackUrl)
+      urlParameters += ("client_secret" -> secret)
+      urlParameters += ("grant_type" -> "authorization_code")
+      urlParameters += ("code" -> ggCode.toString)
 
-    val tempRequest = (:/("accounts.google.com").secure / "o" / "oauth2" / "token").POST <:<
-      Map("Content-Type" -> "application/x-www-form-urlencoded")<< urlParameters
+      val tempRequest = (:/("accounts.google.com").secure / "o" / "oauth2" / "token").POST <:<
+        Map("Content-Type" -> "application/x-www-form-urlencoded")<< urlParameters
 
-    val json = Omniauth.http(tempRequest >-JsonParser.parse)
-    val accessToken = tryo {
-      AuthToken(
-        (json \ "access_token").extract[String],
-        (json \ "expires_in").extract[Option[Long]],
-        (json \ "refresh_token").extract[Option[String]],
-        None
-      )
+      val json = Omniauth.http(tempRequest >-JsonParser.parse)
+      val accessToken = tryo {
+        AuthToken(
+          (json \ "access_token").extract[String],
+          (json \ "expires_in").extract[Option[Long]],
+          (json \ "refresh_token").extract[Option[String]],
+          None
+        )
+      }
+
+      (for {
+        t <- accessToken
+        if validateToken(t)
+      } yield { S.redirectTo(Omniauth.successRedirect) }) openOr S.redirectTo(Omniauth.failureRedirect)
     }
-
-    (for {
-      t <- accessToken
-      if validateToken(t)
-    } yield { S.redirectTo(Omniauth.successRedirect) }) openOr S.redirectTo(Omniauth.failureRedirect)
   }
 
   def validateToken(accessToken: AuthToken): Boolean = {
