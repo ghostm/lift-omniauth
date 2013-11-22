@@ -35,7 +35,7 @@ abstract class OmniauthProvider extends Loggable {
   def tokenToId(token:AuthToken): Box[String]
 
   val csrf = {
-    val bs:Array[Byte] = (1 to 16).map(_.asInstanceOf[Byte]).toArray
+    val bs: Array[Byte] = new Array(16)
     val r = SecureRandom.getInstance("SHA1PRNG", "SUN")
     r.nextBytes(bs)
     bs.map(Integer.toHexString(_)).reduce(_ + _)
