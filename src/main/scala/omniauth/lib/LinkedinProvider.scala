@@ -23,8 +23,6 @@ class LinkedinProvider(val clientId:String, val secret:String) extends OmniauthP
   def linkedinPermissions =
     Props.get("omniauth.linkedinpermissions") openOr "r_emailaddress,r_basicprofile"
 
-  def linkedinFields = Props.get("omniauth.linkedinfields") openOr "id,first-name,last-name,email-address"
-
   def signIn():NodeSeq = doLinkedinSignin
   def callback(): NodeSeq = doLinkedinCallback
   implicit val formats = net.liftweb.json.DefaultFormats
@@ -75,7 +73,7 @@ class LinkedinProvider(val clientId:String, val secret:String) extends OmniauthP
   def validateToken(accessToken: AuthToken): Boolean = {
     val urlParameters = Map("oauth2_access_token" -> accessToken.token,
       "format" -> "json")
-    val profile = "~:(" + linkedinFields + ")"
+    val profile = "~:(id,first-name,last-name,email-address)"
     val tempRequest = :/("api.linkedin.com").secure / "v1" / "people" / profile <<? urlParameters
 
     val json = Omniauth.http(tempRequest >- JsonParser.parse)
