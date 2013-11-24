@@ -57,10 +57,9 @@ class InstagramProvider(val clientId:String, val secret:String) extends Omniauth
       
       val uid =  (json \ "user" \ "id").extract[String]
       val username =  (json \ "user" \ "username").extract[String]
-      val full_name = (json \ "full_name").extract[String].split(" ")
-      val email = (json \ "email").extract[String]
+      val full_name = (json \ "user" \ "full_name").extract[String].split(" ")
       
-      val ai = AuthInfo(providerName, uid, username, t, Some(secret), Some(username), Some(email), full_name.headOption, full_name.lastOption)
+      val ai = AuthInfo(providerName, uid, username, t, Some(secret), Some(username), None, full_name.headOption, full_name.lastOption)
       Omniauth.setAuthInfo(ai)
       logger.debug(ai)
       S.redirectTo(Omniauth.successRedirect) 
