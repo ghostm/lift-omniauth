@@ -2,19 +2,11 @@ package omniauth.lib
 
 import omniauth.Omniauth
 import dispatch.classic._
-import oauth.{Token, Consumer}
-import json._
-import JsHttp._
-import oauth._
-import oauth.OAuth._
-import xml.{Text, NodeSeq}
+import xml.NodeSeq
 import net.liftweb.common.{Full, Empty, Box}
 import net.liftweb.json.JsonParser
-import net.liftweb.json.JsonAST._
 import net.liftweb.http._
 import net.liftweb.util.Props
-import net.liftweb.sitemap.{Menu, Loc, SiteMap}
-import Loc._
 import omniauth.AuthInfo
 
 
@@ -54,16 +46,15 @@ class MSLiveProvider(val clientId:String, val secret:String) extends OmniauthPro
     urlParameters += ("grant_type" -> "authorization_code")
     val tempRequest = :/("login.live.com").secure / "oauth20_token.srf" <<? urlParameters
 
-    val accessTokenString = try{
+    val accessToken = try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
-      val accessTokenString =  (json \ "access_token").extract[String]
-      accessTokenString
+      json.extract[AuthToken]
     } catch {
       case _ : Throwable =>
         logger.debug("didn't find access tokenss")
         S.redirectTo(Omniauth.failureRedirect)
     }
-    if(validateToken(accessTokenString)){
+    if(validateToken(accessToken)){
       S.redirectTo(Omniauth.successRedirect)
     }else{
       S.redirectTo(Omniauth.failureRedirect)
@@ -71,8 +62,8 @@ class MSLiveProvider(val clientId:String, val secret:String) extends OmniauthPro
 
   }
 
-  def validateToken(accessToken:String): Boolean = {
-    val tempRequest = :/("apis.live.net").secure / "v5.0/me" <<? Map("access_token" -> accessToken)
+  def validateToken(accessToken:AuthToken): Boolean = {
+    val tempRequest = :/("apis.live.net").secure / "v5.0/me" <<? Map("access_token" -> accessToken.token)
     try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
 
@@ -92,8 +83,8 @@ class MSLiveProvider(val clientId:String, val secret:String) extends OmniauthPro
     }
   }
 
-  def tokenToId(accessToken:String): Box[String] = {
-    val tempRequest = :/("apis.live.net/v5.0/").secure / "me" <<? Map("access_token" -> accessToken)
+  def tokenToId(accessToken:AuthToken): Box[String] = {
+    val tempRequest = :/("apis.live.net/v5.0/").secure / "me" <<? Map("access_token" -> accessToken.token)
     try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
       Full((json \ "id").extract[String])

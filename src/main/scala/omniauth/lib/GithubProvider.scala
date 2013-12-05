@@ -17,19 +17,16 @@
 package omniauth.lib
 import omniauth.Omniauth
 import dispatch.classic._
-import xml.{Text, NodeSeq}
+import xml.NodeSeq
 import net.liftweb.common.{Full, Empty, Box}
 import net.liftweb.util.Helpers._
 import net.liftweb.json._
 import net.liftweb.http._
 import omniauth.AuthInfo
-import java.util.UUID
 import net.liftweb.util.Props
 
 
 class GithubProvider(val clientId:String, val secret:String) extends OmniauthProvider{
-  private val state = UUID.randomUUID().toString
-  
   def providerName = GithubProvider.providerName
   def providerPropertyKey = GithubProvider.providerPropertyKey
   def providerPropertySecret = GithubProvider.providerPropertySecret
@@ -46,42 +43,35 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
     var urlParameters = Map[String, String]()
     urlParameters += ("client_id" -> clientId)
     urlParameters += ("redirect_uri" -> callbackUrl)
-    urlParameters += ("state" -> state)    
+    urlParameters += ("state" -> csrf)
     urlParameters += ("scope" -> githubScope)        
     requestUrl += Omniauth.q_str(urlParameters)
     S.redirectTo(requestUrl)
   }
 
   def doGithubCallback () : NodeSeq = {
-    if (S.param("state") map {_ != state} openOr true ) S.redirectTo("/") 
-    val ghCode = S.param("code") openOr S.redirectTo("/")
-    val callbackUrl = Omniauth.siteAuthBaseUrl+"auth/"+providerName+"/callback"
-    var urlParameters = Map[String, String]()
-    urlParameters += ("client_id" -> clientId)
-    urlParameters += ("redirect_uri" -> callbackUrl)
-    urlParameters += ("client_secret" -> secret)
-    urlParameters += ("code" -> ghCode.toString)
-    val tempRequest = :/("github.com").secure / "login/oauth/access_token" <<? urlParameters
-    var accessTokenString = Omniauth.http(tempRequest as_str)
-    if(accessTokenString.startsWith("access_token=")){
-      accessTokenString = accessTokenString.stripPrefix("access_token=")
-      val ampIndex = accessTokenString.indexOf("&")
-      if(ampIndex >= 0){
-        accessTokenString = accessTokenString.take(ampIndex)
-      }
-      if(validateToken(accessTokenString)){
+    execWithStateValidation {
+      val ghCode = S.param("code") openOr S.redirectTo("/")
+      val callbackUrl = Omniauth.siteAuthBaseUrl+"auth/"+providerName+"/callback"
+      var urlParameters = Map[String, String]()
+      urlParameters += ("client_id" -> clientId)
+      urlParameters += ("redirect_uri" -> callbackUrl)
+      urlParameters += ("client_secret" -> secret)
+      urlParameters += ("code" -> ghCode.toString)
+      val tempRequest = :/("github.com").secure / "login/oauth/access_token" <<? urlParameters
+
+      val accessToken = extractToken(Omniauth.http(tempRequest as_str))
+
+      if(validateToken(accessToken)){
         S.redirectTo(Omniauth.successRedirect)
       }else{
         S.redirectTo(Omniauth.failureRedirect)
       }
-    }else{
-      logger.debug("didn't find access token")
-      S.redirectTo(Omniauth.failureRedirect)
     }
   }
 
-  def validateToken(accessToken:String): Boolean = {
-    val tempRequest = :/("api.github.com").secure / "user" <<? Map("access_token" -> accessToken)
+  def validateToken(accessToken:AuthToken): Boolean = {
+    val tempRequest = :/("api.github.com").secure / "user" <<? Map("access_token" -> accessToken.token)
     try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
       
@@ -109,8 +99,8 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
     }
   }
 
-  def tokenToId(accessToken:String): Box[String] = {
-    val tempRequest = :/("api.github.com").secure / "user" <<? Map("access_token" -> accessToken)
+  def tokenToId(accessToken:AuthToken): Box[String] = {
+    val tempRequest = :/("api.github.com").secure / "user" <<? Map("access_token" -> accessToken.token)
     try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
       Full((json \ "id").extract[String])

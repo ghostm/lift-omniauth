@@ -7,23 +7,13 @@ import common._
 import http.S
 import json.JsonParser
 
-import scala.xml.NodeSeq
-
-import java.security.SecureRandom
 
 import dispatch.classic._
 
 class DropboxProvider (val key:String, val secret:String) extends OmniauthProvider{
   implicit val formats = net.liftweb.json.DefaultFormats
   def providerName = DropboxProvider.providerName
-  
-  val csrf = {
-    val bs:Array[Byte] = (1 to 16).map(_.asInstanceOf[Byte]).toArray
-    val r = SecureRandom.getInstance("SHA1PRNG", "SUN")
-    r.nextBytes(bs)
-    bs.map(Integer.toHexString(_)).reduce(_ + _)
-  }
-  
+
   def callbackUrl = Omniauth.siteAuthBaseUrl+"auth/"+providerName+"/callback"
   
   def signIn() = {
@@ -38,9 +28,7 @@ class DropboxProvider (val key:String, val secret:String) extends OmniauthProvid
   }
   
   def callback() = {
-    val state = S.param("state") openOr ("")
-    
-    if(csrf == state) {
+    execWithStateValidation {
       S.param("code") match {
         case Full(code) => {
           val req = :/("api.dropbox.com").secure / "1/oauth2/token" << Map(
@@ -51,11 +39,14 @@ class DropboxProvider (val key:String, val secret:String) extends OmniauthProvid
             "client_secret" -> secret
           )
           
-          val res = Omniauth.http(req >- JsonParser.parse)
-          val token     = (res \ "access_token").extract[String]
-          val tokenType = (res \ "token_type").extract[String]
-          val uid       = (res \ "uid").extract[String]
-          
+          val json = Omniauth.http(req >- JsonParser.parse)
+          val token = AuthToken(
+              (json \ "access_token").extract[String],
+              None,
+              None,
+              None
+            )
+
           if(validateToken(token)) {
             logger.debug("token validated")
             S.redirectTo(Omniauth.successRedirect)
@@ -71,15 +62,10 @@ class DropboxProvider (val key:String, val secret:String) extends OmniauthProvid
         }
 
       }
-    } else {
-      logger.debug("state did not match")
-      S.redirectTo(Omniauth.failureRedirect)
     }
-    
-    NodeSeq.Empty
   }
   
-  def validateToken(token:String) = {
+  def validateToken(token: AuthToken) = {
     try {
       val (res, name, uid) = accountInfo(token)
 
@@ -97,16 +83,16 @@ class DropboxProvider (val key:String, val secret:String) extends OmniauthProvid
     }
   }
   
-  def tokenToId(token:String) = accountInfo(token) match {
+  def tokenToId(token:AuthToken) = accountInfo(token) match {
     case (res, name, uid) => Full(uid)
     case _ => Empty
   }
   
   
-  def accountInfo(token:String) = {
+  def accountInfo(accessToken:AuthToken) = {
     val req = :/("api.dropbox.com").secure / "1/account/info" << Map(
       "locale" -> S.locale.getLanguage()) <:< Map(
-      "Authorization" -> ("Bearer "+token))
+      "Authorization" -> ("Bearer "+accessToken.token))
 
     val res = Omniauth.http(req >- JsonParser.parse)
     val name = (res \ "display_name").extract[String]

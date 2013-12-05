@@ -19,8 +19,8 @@ class GoogleProvider(val clientId:String, val secret:String) extends OmniauthPro
   def providerPropertyKey = GoogleProvider.providerPropertyKey
   def providerPropertySecret = GoogleProvider.providerPropertySecret
 
-  def googlePermissions =
-    Props.get("omniauth.googlepermissions") openOr "openid email profile"
+  def googlePermissions = Props.get("omniauth.googlepermissions") openOr ""
+  def googleAccessType = Props.get("omniauth.googleaccesstype") openOr "online"
 
   def signIn():NodeSeq = doGoogleSignin
   def callback(): NodeSeq = doGoogleCallback
@@ -32,6 +32,7 @@ class GoogleProvider(val clientId:String, val secret:String) extends OmniauthPro
     var urlParameters = Map[String, String]()
     urlParameters += ("client_id" -> clientId)
     urlParameters += ("redirect_uri" -> callbackUrl)
+    urlParameters += ("access_type" -> googleAccessType)
     urlParameters += ("scope" -> googlePermissions)
     urlParameters += ("response_type" -> "code")
     urlParameters += ("scope" -> googlePermissions)
@@ -40,29 +41,39 @@ class GoogleProvider(val clientId:String, val secret:String) extends OmniauthPro
   }
 
   def doGoogleCallback () : NodeSeq = {
-    val ggCode = S.param("code") openOr S.redirectTo("/")
-    val callbackUrl = Omniauth.siteAuthBaseUrl+"auth/"+providerName+"/callback"
-    var urlParameters = Map[String, String]()
-    urlParameters += ("client_id" -> clientId)
-    urlParameters += ("redirect_uri" -> callbackUrl)
-    urlParameters += ("client_secret" -> secret)
-    urlParameters += ("grant_type" -> "authorization_code")
-    urlParameters += ("code" -> ggCode.toString)
+    execWithStateValidation {
+      val ggCode = S.param("code") openOr S.redirectTo("/")
+      val callbackUrl = Omniauth.siteAuthBaseUrl+"auth/"+providerName+"/callback"
+      var urlParameters = Map[String, String]()
+      urlParameters += ("client_id" -> clientId)
+      urlParameters += ("redirect_uri" -> callbackUrl)
+      urlParameters += ("client_secret" -> secret)
+      urlParameters += ("grant_type" -> "authorization_code")
+      urlParameters += ("code" -> ggCode.toString)
 
-    val tempRequest = (:/("accounts.google.com").secure / "o" / "oauth2" / "token").POST <:<
-      Map("Content-Type" -> "application/x-www-form-urlencoded")<< urlParameters
+      val tempRequest = (:/("accounts.google.com").secure / "o" / "oauth2" / "token").POST <:<
+        Map("Content-Type" -> "application/x-www-form-urlencoded")<< urlParameters
 
-    val json = Omniauth.http(tempRequest >-JsonParser.parse)
-    val accessTokenString = tryo((json \ "access_token").extract[String])
+      val json = Omniauth.http(tempRequest >-JsonParser.parse)
+      val accessToken = tryo {
+        AuthToken(
+          (json \ "access_token").extract[String],
+          (json \ "expires_in").extract[Option[Long]],
+          (json \ "refresh_token").extract[Option[String]],
+          None
+        )
+      }
 
-    (for {
-      t <- accessTokenString
-      if validateToken(t)
-    } yield { S.redirectTo(Omniauth.successRedirect) }) openOr S.redirectTo(Omniauth.failureRedirect)
+      (for {
+        t <- accessToken
+        if validateToken(t)
+      } yield { S.redirectTo(Omniauth.successRedirect) }) openOr S.redirectTo(Omniauth.failureRedirect)
+    }
   }
 
-  def validateToken(accessToken:String): Boolean = {
-    val tempRequest = :/("www.googleapis.com").secure / "oauth2" / "v1" / "userinfo" <<? Map("access_token" -> accessToken)
+  def validateToken(accessToken: AuthToken): Boolean = {
+    val tempRequest = :/("www.googleapis.com").secure / "oauth2" / "v1" / "userinfo" <<?
+      Map("access_token" -> accessToken.token)
 
     try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
@@ -83,8 +94,10 @@ class GoogleProvider(val clientId:String, val secret:String) extends OmniauthPro
     }
   }
 
-  def tokenToId(accessToken:String): Box[String] = {
-    val tempRequest = :/("googleapis.com").secure / "v1" / "userinfo" <<? Map("access_token" -> accessToken)
+  def tokenToId(accessToken: AuthToken): Box[String] = {
+    val tempRequest = :/("googleapis.com").secure / "v1" / "userinfo" <<?
+      Map("access_token" -> accessToken.token)
+
     try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
       Full((json \ "id").extract[String])

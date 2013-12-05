@@ -17,22 +17,15 @@
 package omniauth.lib
 import omniauth.Omniauth
 import dispatch.classic._
-import oauth.{Token, Consumer}
-import json._
-import JsHttp._
 import oauth._
 import oauth.OAuth._
-import twitter.{Auth}
-import xml.{Text, NodeSeq}
-import net.liftweb.common.{Full, Empty, Box}
+import twitter.Auth
+import xml.NodeSeq
 import net.liftweb.json.JsonParser
-import net.liftweb.json.JsonAST._
 import net.liftweb.http._
-import net.liftweb.sitemap.{Menu, Loc, SiteMap}
-import Loc._
 import net.liftweb.common._
 import omniauth.AuthInfo
-
+import net.liftweb.util.Helpers._
 
 class TwitterProvider(val key:String, val secret:String) extends OmniauthProvider {
   def providerName = TwitterProvider.providerName
@@ -61,11 +54,12 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
 
   def doTwitterCallback () : NodeSeq = {
     logger.debug("doTwitterCallback")
-    var verifier = S.param("oauth_verifier") openOr S.redirectTo(Omniauth.failureRedirect)
+    val verifier = S.param("oauth_verifier") openOr S.redirectTo(Omniauth.failureRedirect)
     var requestToken = Omniauth.currentRequestToken openOr S.redirectTo(Omniauth.failureRedirect)
     Omniauth.http(Auth.access_token(consumer, requestToken, verifier)) match {
       case (access_tok, tempUid, screen_name) => {
-        if(validateToken(""+access_tok.value+","+access_tok.secret)){
+        val accessToken = AuthToken(access_tok.value, None, None, emptyForBlank(access_tok.secret))
+        if(validateToken(accessToken)){
           S.redirectTo(Omniauth.successRedirect)
         }else{
           S.redirectTo(Omniauth.failureRedirect)
@@ -75,14 +69,13 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
     }
   }
 
-  //Token must be of the format value,secret
-  def validateToken(accessToken:String): Boolean = {
-    val tokenParts = accessToken.split(",")
-    if(tokenParts.length != 2){
-      logger.debug("tokenParts.length != 2: "+accessToken)
+  def validateToken(accessToken:AuthToken): Boolean = {
+    val tokenParts = accessToken.token
+    if(accessToken.secret.isEmpty){
+      logger.debug("tokenParts.length != 2: "+accessToken.token +",")
       return false
     }
-    val authToken = Token(tokenParts(0), tokenParts(1))
+    val authToken = Token(accessToken.token, accessToken.secret.get)
     logger.debug("authToken "+authToken)
     val verifyCreds = Omniauth.TwitterHost / "1.1/account/verify_credentials.json" <@ (consumer, authToken)
     try{
@@ -92,7 +85,8 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
       val name = (json \ "name").extract[String]
       val nickName = (json \ "screen_name").extract[String]
 
-      val ai = AuthInfo(providerName,uid,name,authToken.value,Some(authToken.secret),Some(nickName))
+
+      val ai = AuthInfo(providerName,uid,name,accessToken,Some(authToken.secret),Some(nickName))
       Omniauth.setAuthInfo(ai)
       logger.debug(ai)
       true
@@ -101,8 +95,8 @@ class TwitterProvider(val key:String, val secret:String) extends OmniauthProvide
     }
   }
 
-  def tokenToId(accessToken:String): Box[String] = {
-    val tokenParts = accessToken.split(",")
+  def tokenToId(accessToken:AuthToken): Box[String] = {
+    val tokenParts = accessToken.token.split(",")
     if(tokenParts.length != 2){
       logger.debug("tokenParts.length != 2: "+accessToken)
       return Empty

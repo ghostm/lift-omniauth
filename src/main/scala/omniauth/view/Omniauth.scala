@@ -16,20 +16,9 @@
 
 package omniauth.view
 
-import omniauth.lib._
-import dispatch.classic._
-import oauth.{ Token, Consumer }
-import json._
-import JsHttp._
-import oauth._
-import oauth.OAuth._
-import xml.{ Text, NodeSeq }
-import net.liftweb.common.{ Loggable, Full, Empty, Box }
-import net.liftweb.json.JsonParser
-import net.liftweb.json.JsonAST._
+import xml.NodeSeq
+import net.liftweb.common.Loggable
 import net.liftweb.http._
-import net.liftweb.sitemap.{ Menu, Loc, SiteMap }
-import Loc._
 import net.liftweb.util.LiftFlowOfControlException
 
 class Omniauth extends LiftView with Loggable {

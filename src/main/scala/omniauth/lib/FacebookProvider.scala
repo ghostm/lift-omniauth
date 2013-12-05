@@ -17,19 +17,11 @@
 package omniauth.lib
 import omniauth.Omniauth
 import dispatch.classic._
-import oauth.{Token, Consumer}
-import json._
-import JsHttp._
-import oauth._
-import oauth.OAuth._
-import xml.{Text, NodeSeq}
+import xml.NodeSeq
 import net.liftweb.common.{Full, Empty, Box}
 import net.liftweb.json.JsonParser
-import net.liftweb.json.JsonAST._
 import net.liftweb.http._
 import net.liftweb.util.Props
-import net.liftweb.sitemap.{Menu, Loc, SiteMap}
-import Loc._
 import omniauth.AuthInfo
 
 
@@ -65,26 +57,17 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
     urlParameters += ("client_secret" -> secret)
     urlParameters += ("code" -> fbCode.toString)
     val tempRequest = :/("graph.facebook.com").secure / "oauth/access_token" <<? urlParameters
-    var accessTokenString = Omniauth.http(tempRequest as_str)
-    if(accessTokenString.startsWith("access_token=")){
-      accessTokenString = accessTokenString.stripPrefix("access_token=")
-      val ampIndex = accessTokenString.indexOf("&")
-      if(ampIndex >= 0){
-        accessTokenString = accessTokenString.take(ampIndex)
-      }
-      if(validateToken(accessTokenString)){
-        S.redirectTo(Omniauth.successRedirect)
-      }else{
-        S.redirectTo(Omniauth.failureRedirect)
-      }
+    val accessToken = extractToken(Omniauth.http(tempRequest as_str))
+
+    if(validateToken(accessToken)){
+      S.redirectTo(Omniauth.successRedirect)
     }else{
-      logger.debug("didn't find access token")
       S.redirectTo(Omniauth.failureRedirect)
     }
   }
 
-  def validateToken(accessToken:String): Boolean = {
-    val tempRequest = :/("graph.facebook.com").secure / "me" <<? Map("access_token" -> accessToken)
+  def validateToken(accessToken:AuthToken): Boolean = {
+    val tempRequest = :/("graph.facebook.com").secure / "me" <<? Map("access_token" -> accessToken.token)
     try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
 
@@ -104,8 +87,8 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
     }
   }
 
-  def tokenToId(accessToken:String): Box[String] = {
-    val tempRequest = :/("graph.facebook.com").secure / "me" <<? Map("access_token" -> accessToken)
+  def tokenToId(accessToken:AuthToken): Box[String] = {
+    val tempRequest = :/("graph.facebook.com").secure / "me" <<? Map("access_token" -> accessToken.token)
     try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
       Full((json \ "id").extract[String])
