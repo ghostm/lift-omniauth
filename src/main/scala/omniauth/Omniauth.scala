@@ -74,7 +74,8 @@ trait Omniauth  {
     getProviderFromProperties(MSLiveProvider.providerName, MSLiveProvider.providerPropertyKey, MSLiveProvider.providerPropertySecret),
     getProviderFromProperties(DropboxProvider.providerName, DropboxProvider.providerPropertyKey, DropboxProvider.providerPropertySecret),
     getProviderFromProperties(GoogleProvider.providerName, GoogleProvider.providerPropertyKey, GoogleProvider.providerPropertySecret),
-    getProviderFromProperties(LinkedinProvider.providerName, LinkedinProvider.providerPropertyKey, LinkedinProvider.providerPropertySecret)
+    getProviderFromProperties(LinkedinProvider.providerName, LinkedinProvider.providerPropertyKey, LinkedinProvider.providerPropertySecret),
+    getProviderFromProperties(InstagramProvider.providerName, InstagramProvider.providerPropertyKey, InstagramProvider.providerPropertySecret)
     ).flatten(a => a)
   }
 
@@ -90,6 +91,7 @@ trait Omniauth  {
             case DropboxProvider.providerName => Full(new DropboxProvider(pk, ps))
             case GoogleProvider.providerName => Full(new GoogleProvider(pk, ps))
             case LinkedinProvider.providerName => Full(new LinkedinProvider(pk, ps))
+            case InstagramProvider.providerName => Full(new InstagramProvider(pk, ps))
             case _ => {
               logger.warn("no provider found for "+providerName)
               Empty
@@ -169,6 +171,7 @@ trait Omniauth  {
   )
   def q_str (values: Map[String, Any]) = URLEncodedUtils.format(map2ee(values), Request.factoryCharset)
 }
+
 case class AuthInfo(provider:String,
                     uid:String,
                     name:String,
