@@ -76,3 +76,4 @@ Lift-OmniAuth currently supports the following external providers:
   * Dropbox
   * Linkedin
   * Google+
+  * Instagram
