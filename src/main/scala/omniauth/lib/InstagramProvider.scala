@@ -48,10 +48,16 @@ class InstagramProvider(val clientId:String, val secret:String) extends Omniauth
       Map("Content-Type" -> "application/x-www-form-urlencoded")<< urlParameters
 
     val json = Omniauth.http(tempRequest >-JsonParser.parse)
-    val accessTokenString = tryo((json \ "access_token").extract[String])
-
+    val accessToken = tryo {
+      AuthToken(
+        (json \ "access_token").extract[String],
+        None,
+        None,
+        None
+      )
+    }
     (for {
-      t <- accessTokenString
+      t <- accessToken
       if validateToken(t)
     } yield { 
       
@@ -67,8 +73,8 @@ class InstagramProvider(val clientId:String, val secret:String) extends Omniauth
     }) openOr S.redirectTo(Omniauth.failureRedirect)
   }
 
-  def validateToken(accessToken:String): Boolean = {
-    val tempRequest = :/("api.instagram.com").secure / "v1" / "users" / "self" / "feed" <<? Map("access_token" -> accessToken)
+  def validateToken(accessToken:AuthToken): Boolean = {
+    val tempRequest = :/("api.instagram.com").secure / "v1" / "users" / "self" / "feed" <<? Map("access_token" -> accessToken.token)
 
     try{
       Omniauth.http(tempRequest >- JsonParser.parse)
@@ -78,7 +84,7 @@ class InstagramProvider(val clientId:String, val secret:String) extends Omniauth
     }
   }
   
-  def tokenToId(accessToken:String): Box[String] = {
+  def tokenToId(accessToken:AuthToken): Box[String] = {
     None
   }
 
