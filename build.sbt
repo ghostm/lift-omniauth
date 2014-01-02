@@ -1,4 +1,4 @@
-name := "Omniauth"
+name := "omniauth"
 
 organization := "net.liftmodules"
 
@@ -8,7 +8,7 @@ liftVersion <<= liftVersion ?? "3.0-SNAPSHOT"
 
 liftEdition <<= liftVersion apply { _.substring(0,3) }
 
-name <<= (name, liftEdition) { (n, e) =>  n + "_" + e }
+moduleName <<= (name, liftEdition) { (n, e) =>  n + "_" + e }
 
 scalaVersion := "2.10.3"
 
