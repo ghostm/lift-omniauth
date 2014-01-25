@@ -101,7 +101,7 @@ trait Omniauth  {
         case Empty => logger.warn("getProviderFromProperties: empty secret"); Empty
         case Failure(_,_,_) => logger.warn("getProviderFromProperties: fail secret"); Empty
       }
-      case Empty => logger.warn("getProviderFromProperties:" + providerKey + " empty key"); Empty
+      case Empty => logger.info("getProviderFromProperties:" + providerKey + " empty key"); Empty
       case Failure(_,_,_) => logger.warn("getProviderFromProperties: fail key"); Empty
     }
   }
@@ -131,6 +131,10 @@ trait Omniauth  {
 
   def init = {
     providers = providerListFromProperties()
+    if(providers.size > 0)
+      logger.info("Configured "+providers.size+" providers: "+providers.map(_.providerName))
+    else
+      logger.warn("No providers were configured for Omniauth!")
     commonInit
   }
 
