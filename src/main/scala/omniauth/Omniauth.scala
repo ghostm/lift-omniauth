@@ -22,7 +22,6 @@ import oauth._
 import net.liftweb.http._
 import net.liftweb.sitemap.{Menu, Loc}
 import Loc._
-import net.liftweb.util.Props
 import net.liftweb.common._
 import org.apache.http.client.utils.URLEncodedUtils
 import org.apache.http.message.BasicNameValuePair
@@ -80,8 +79,8 @@ trait Omniauth  {
   }
 
   private def getProviderFromProperties(providerName:String, providerKey:String, providerSecret:String):Box[OmniauthProvider] = {
-     Props.get(providerKey) match {
-      case Full(pk) => Props.get(providerSecret) match {
+     Properties.get(providerKey) match {
+      case Full(pk) => Properties.get(providerSecret) match {
         case Full(ps) => {
           providerName match {
             case TwitterProvider.providerName => Full(new TwitterProvider(pk, ps))
@@ -112,9 +111,9 @@ trait Omniauth  {
     	case "img" ::  img  => true
     })       
     
-    siteAuthBaseUrl = Props.get("omniauth.baseurl") openOr "http://0.0.0.0:8080/"
-    successRedirect = Props.get("omniauth.successurl") openOr "/"
-    failureRedirect = Props.get("omniauth.failureurl") openOr "/"
+    siteAuthBaseUrl = Properties.get("omniauth.baseurl") openOr "http://0.0.0.0:8080/"
+    successRedirect = Properties.get("omniauth.successurl") openOr "/"
+    failureRedirect = Properties.get("omniauth.failureurl") openOr "/"
 
     LiftRules.addToPackages("omniauth")
 

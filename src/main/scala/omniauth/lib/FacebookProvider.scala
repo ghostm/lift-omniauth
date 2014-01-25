@@ -21,7 +21,6 @@ import xml.NodeSeq
 import net.liftweb.common.{Full, Empty, Box}
 import net.liftweb.json.JsonParser
 import net.liftweb.http._
-import net.liftweb.util.Props
 import omniauth.AuthInfo
 
 
@@ -31,7 +30,7 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
   def providerPropertySecret = FacebookProvider.providerPropertySecret
 
   def facebookPermissions = 
-    Props.get("omniauth.facebookpermissions") openOr ""
+    Properties.get("omniauth.facebookpermissions") openOr ""
 
   def signIn():NodeSeq = doFacebookSignin
   def callback(): NodeSeq = doFacebookCallback

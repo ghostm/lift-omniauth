@@ -6,7 +6,6 @@ import xml.NodeSeq
 import net.liftweb.common.{Full, Empty, Box}
 import net.liftweb.json.JsonParser
 import net.liftweb.http._
-import net.liftweb.util.Props
 import omniauth.AuthInfo
 
 
@@ -16,7 +15,7 @@ class MSLiveProvider(val clientId:String, val secret:String) extends OmniauthPro
   def providerPropertySecret = MSLiveProvider.providerPropertySecret
 
   def mslivePermissions =
-    Props.get("omniauth.mslivepermissions") openOr ""
+    Properties.get("omniauth.mslivepermissions") openOr ""
 
   def signIn():NodeSeq = doMSLiveSignin
   def callback(): NodeSeq = doMSLiveCallback

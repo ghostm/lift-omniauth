@@ -1,6 +1,5 @@
 package omniauth.lib
 
-import net.liftweb.util.Props
 import scala.xml.NodeSeq
 import omniauth.{AuthInfo, Omniauth}
 import net.liftweb.http.S
@@ -19,8 +18,8 @@ class GoogleProvider(val clientId:String, val secret:String) extends OmniauthPro
   def providerPropertyKey = GoogleProvider.providerPropertyKey
   def providerPropertySecret = GoogleProvider.providerPropertySecret
 
-  def googlePermissions = Props.get("omniauth.googlepermissions") openOr ""
-  def googleAccessType = Props.get("omniauth.googleaccesstype") openOr "online"
+  def googlePermissions = Properties.get("omniauth.googlepermissions") openOr ""
+  def googleAccessType = Properties.get("omniauth.googleaccesstype") openOr "online"
 
   def signIn():NodeSeq = doGoogleSignin
   def callback(): NodeSeq = doGoogleCallback
