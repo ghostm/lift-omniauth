@@ -57,11 +57,11 @@ To include this module in your Lift project, update your `libraryDependencies` i
 
 For *Lift 2.5.x* (Scala 2.9 and 2.10):
 
-    "net.liftmodules" %% "omniauth_2.5" % "0.9"
+    "net.liftmodules" %% "omniauth_2.5" % "0.10"
 
 For *Lift 3.0.x* (Scala 2.10):
 
-    "net.liftmodules" %% "omniauth_3.0" % "0.9"
+    "net.liftmodules" %% "omniauth_3.0" % "0.10"
 
 
 ## Providers
