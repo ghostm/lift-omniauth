@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 Matthew Henderson
+ * Copyright 2010-2014 Matthew Henderson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,20 @@
  */
 
 package omniauth.lib
-import omniauth.Omniauth
-import dispatch.classic._
+
+import java.util.UUID
+
 import xml.NodeSeq
-import net.liftweb.common.{Full, Empty, Box}
+
+import dispatch.classic._
+
+import net.liftweb.common.{Failure, Full, Empty, Box}
 import net.liftweb.util.Helpers._
 import net.liftweb.json._
 import net.liftweb.http._
+import net.liftweb.util.Props
+
+import omniauth.Omniauth
 import omniauth.AuthInfo
 
 class GithubProvider(val clientId:String, val secret:String) extends OmniauthProvider{
@@ -33,6 +40,7 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
   
   def signIn():NodeSeq = doGithubSignin
   def callback(): NodeSeq = doGithubCallback
+
   implicit val formats = net.liftweb.json.DefaultFormats
 
   def doGithubSignin() : NodeSeq = {
@@ -44,6 +52,7 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
     urlParameters += ("state" -> csrf)
     urlParameters += ("scope" -> githubScope)        
     requestUrl += Omniauth.q_str(urlParameters)
+    logger.info("Redirecting user to: "+requestUrl)
     S.redirectTo(requestUrl)
   }
 
@@ -109,9 +118,24 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
 
 }
 
-object GithubProvider{
+object GithubProvider {
   val providerName = "github"
   val providerPropertyKey = "omniauth.githubkey"
   val providerPropertySecret = "omniauth.githubsecret"
+
+  /**
+   * The Github API requires certain values to be supplied in the header, and this
+   * method adds them. See: http://developer.github.com/v3/#user-agent-required
+   * @param githubPath the path into the API, such as "user".
+   * @param params option list of "key -> value" pairs to send as parameters.
+   * @return the prepared Request object ready to call.
+   */
+  def makeApiRequest(githubPath: String, params: (String,String)*) : Request = {
+    val headers = Map(
+      "User-Agent" -> "Lift Omniauth",
+      "Accept"     -> "application/vnd.github.v3")
+    :/("api.github.com").secure / githubPath <<? Map(params:_*) <:< headers
+  }
+
 }
 
