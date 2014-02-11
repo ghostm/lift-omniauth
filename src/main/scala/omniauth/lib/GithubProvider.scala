@@ -78,9 +78,9 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
   }
 
   def validateToken(accessToken:AuthToken): Boolean = {
-    val tempRequest = :/("api.github.com").secure / "user" <<? Map("access_token" -> accessToken.token)
+    val userReq = GithubProvider.makeApiRequest("user", "access_token" -> accessToken.token)
     try{
-      val json = Omniauth.http(tempRequest >- JsonParser.parse)
+      val json = Omniauth.http(userReq >- JsonParser.parse)
       
       val uid =  (json \ "id").extract[String]
       val name =  (json \ "name").extract[String]
@@ -107,9 +107,9 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
   }
 
   def tokenToId(accessToken:AuthToken): Box[String] = {
-    val tempRequest = :/("api.github.com").secure / "user" <<? Map("access_token" -> accessToken.token)
+    val userReq = GithubProvider.makeApiRequest("user", "access_token" -> accessToken.token)
     try{
-      val json = Omniauth.http(tempRequest >- JsonParser.parse)
+      val json = Omniauth.http(userReq >- JsonParser.parse)
       Full((json \ "id").extract[String])
     } catch {
       case _ : Throwable => Empty
