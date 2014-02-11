@@ -1,6 +1,5 @@
 package omniauth.lib
 
-import net.liftweb.util.Props
 import scala.xml.{XML, NodeSeq}
 import omniauth.{AuthInfo, Omniauth}
 import net.liftweb.http.S
@@ -21,7 +20,7 @@ class LinkedinProvider(val clientId:String, val secret:String) extends OmniauthP
   def providerPropertySecret = LinkedinProvider.providerPropertySecret
 
   def linkedinPermissions =
-    Props.get("omniauth.linkedinpermissions") openOr "r_emailaddress,r_basicprofile"
+    Properties.get("omniauth.linkedinpermissions") openOr "r_emailaddress,r_basicprofile"
 
   def signIn():NodeSeq = doLinkedinSignin
   def callback(): NodeSeq = doLinkedinCallback

@@ -23,15 +23,13 @@ import net.liftweb.util.Helpers._
 import net.liftweb.json._
 import net.liftweb.http._
 import omniauth.AuthInfo
-import net.liftweb.util.Props
-
 
 class GithubProvider(val clientId:String, val secret:String) extends OmniauthProvider{
   def providerName = GithubProvider.providerName
   def providerPropertyKey = GithubProvider.providerPropertyKey
   def providerPropertySecret = GithubProvider.providerPropertySecret
 
-  private val  githubScope =  Props.get("omniauth.github.scope") openOr ""
+  private val  githubScope =  Properties.get("omniauth.github.scope") openOr ""
   
   def signIn():NodeSeq = doGithubSignin
   def callback(): NodeSeq = doGithubCallback

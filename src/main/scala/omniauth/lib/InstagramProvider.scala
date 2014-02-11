@@ -1,6 +1,5 @@
 package omniauth.lib
 
-import net.liftweb.util.Props
 import scala.xml.NodeSeq
 import omniauth.{AuthInfo, Omniauth}
 import net.liftweb.http.S
@@ -15,7 +14,7 @@ class InstagramProvider(val clientId:String, val secret:String) extends Omniauth
   def providerPropertySecret = InstagramProvider.providerPropertySecret
 
   def instagramPermissions =
-    Props.get("omniauth.instagrampermissions") openOr "basic"
+    Properties.get("omniauth.instagrampermissions") openOr "basic"
 
   def signIn():NodeSeq = doInstagramSignin
   def callback(): NodeSeq = doInstagramCallback
