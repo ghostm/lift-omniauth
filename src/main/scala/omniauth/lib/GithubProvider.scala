@@ -30,7 +30,9 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
   def providerPropertySecret = GithubProvider.providerPropertySecret
 
   private val  githubScope =  Properties.get("omniauth.github.scope") openOr ""
-  
+  private val  githubUserAgent = Properties.get(GithubProvider.providerPropertyUserName)
+    .openOr(Properties.get(GithubProvider.providerPropertyAppName).openOr(""))
+
   def signIn():NodeSeq = doGithubSignin
   def callback(): NodeSeq = doGithubCallback
   implicit val formats = net.liftweb.json.DefaultFormats
@@ -69,7 +71,10 @@ class GithubProvider(val clientId:String, val secret:String) extends OmniauthPro
   }
 
   def validateToken(accessToken:AuthToken): Boolean = {
-    val tempRequest = :/("api.github.com").secure / "user" <<? Map("access_token" -> accessToken.token)
+    val tempRequest = :/("api.github.com").secure / "user"  <:<
+        Map("User-Agent" ->  githubUserAgent) <<?
+        Map("access_token" -> accessToken.token)
+
     try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
       
@@ -113,5 +118,7 @@ object GithubProvider{
   val providerName = "github"
   val providerPropertyKey = "omniauth.githubkey"
   val providerPropertySecret = "omniauth.githubsecret"
+  val providerPropertyUserName = "omniauth.githubusername"
+  val providerPropertyAppName = "omniauth.githubappname"
 }
 
