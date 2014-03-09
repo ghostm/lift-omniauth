@@ -79,4 +79,4 @@ Lift-OmniAuth currently supports the following external providers:
   * Instagram
 
 ## Tutorials
-(Joe Barnes)[https://github.com/barnesjd] has written [Dropbox tutorial](http://proseand.co.nz/2014/01/20/integrating-dropbox-into-a-lift-app/).
+[Joe Barnes](https://github.com/barnesjd) has written [Dropbox tutorial](http://proseand.co.nz/2014/01/20/integrating-dropbox-into-a-lift-app/).
