@@ -66,6 +66,11 @@ trait Omniauth  {
 
   def clearCurrentAuth = authInfo(Empty)
 
+  private object returnUrlInfo extends SessionVar[Box[String]](Empty)
+  def returnTo:Box[String] = returnUrlInfo
+  def setReturnTo(url:String):Unit = returnUrlInfo(Full(url))
+  def clearReturnTo = returnUrlInfo(Empty)
+
   private def providerListFromProperties():List[OmniauthProvider] = {
     List(getProviderFromProperties(FacebookProvider.providerName, FacebookProvider.providerPropertyKey, FacebookProvider.providerPropertySecret),
     getProviderFromProperties(GithubProvider.providerName, GithubProvider.providerPropertyKey, GithubProvider.providerPropertySecret),

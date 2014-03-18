@@ -31,6 +31,7 @@ class Omniauth extends LiftView with Loggable {
   def doAuthSignin: NodeSeq = {
     logger.debug("doAuthSignin")
     val provider = S.param("provider") openOr S.redirectTo(omniauth.Omniauth.failureRedirect)
+    S.param("returnTo").map { url => omniauth.Omniauth.setReturnTo(url) }
     omniauth.Omniauth.providers.foreach(p => {
       if (p.providerName.equalsIgnoreCase(provider)) {
         logger.debug("provider match")
