@@ -17,27 +17,27 @@ Omniauth.init
 
 define your client id (key) and secret for each provider you will use in your props file(s) or as JVM system properties
 
-```scala
+```
 omniauth.facebooksecret=...
 omniauth.facebookkey=...
 ```
 
 set the base URL for your application
 
-```scala
+```
 omniauth.baseurl=http://localhost:8080/
 ```
 
 set the success and failure URLs
 
-```scala
+```
 omniauth.successurl=/
 omniauth.failureurl=/error
 ```
 
 For Facebook provider you can set permissions. For example:
 
-```scala
+```
 omniauth.facebookpermissions=email,read_stream
 ```
     
