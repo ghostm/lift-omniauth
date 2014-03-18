@@ -2,7 +2,7 @@ name := "Omniauth"
 
 organization := "net.liftmodules"
 
-version := "0.11"
+version := "0.12-SNAPSHOT"
 
 liftVersion <<= liftVersion ?? "3.0-SNAPSHOT"
 
@@ -29,15 +29,18 @@ libraryDependencies <++= liftVersion { v =>
 
 //scalacOptions ++= Seq("-feature")
 
-publishTo <<= version { _.endsWith("SNAPSHOT") match {
-        case true  => Some("snapshots" at "https://oss.sonatype.org/content/repositories/snapshots")
-        case false => Some("releases" at "https://oss.sonatype.org/service/local/staging/deploy/maven2")
-  }
- }
+publishTo := Some("mentor-archiva" at "http://orw-symc-vm:9080/archiva/repository/internal/")
 
-credentials += Credentials( file("sonatype.credentials") )
-
-credentials += Credentials( file("/private/liftmodules/sonatype.credentials") )
+credentials ++= Seq(
+  Credentials("Repository Archiva Managed internal Repository",
+              "orw-symc-vm",
+              "jbarnes",
+              "t!OJ890b"),
+  Credentials("Sonatype Nexus Repository Manager",
+              "oss.sonatype.org",
+              "barnesjd",
+              "t!OJ890a")
+)
 
 publishMavenStyle := true
 
