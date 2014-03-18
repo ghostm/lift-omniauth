@@ -2,7 +2,7 @@ name := "Omniauth"
 
 organization := "net.liftmodules"
 
-version := "0.12-SNAPSHOT"
+version := "0.12"
 
 liftVersion <<= liftVersion ?? "2.5.1"
 
