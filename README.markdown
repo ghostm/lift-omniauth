@@ -13,7 +13,7 @@ in Boot.scala
     Omniauth.init
 
 
-in your props file(s) define your client id (key) and secret for each provider you will use
+define your client id (key) and secret for each provider you will use in your props file(s) or as JVM system properties
 
     omniauth.facebooksecret=...
     omniauth.facebookkey=...
@@ -30,7 +30,15 @@ set the success and failure URLs
 For Facebook provider you can set permissions. For example:
 
     omniauth.facebookpermissions=email,read_stream
+    
+Redirect the user to the auth URL in your application:
 
+    S.redirectTo("/auth/facebook/signin")
+    
+You can optionally specify where the user should return to after successful authentication:
+
+    S.redirectTo("/auth/facebook/signin?returnTo=%2Ftimeline%3FshowComments%3Dtrue")
+    
 After a user has logged into an auth provider you can access data through the session var Omniauth.currentAuth
 
     Omniauth.currentAuth match {
@@ -44,10 +52,10 @@ You can also use obtain a user's unique ID from a provider without using session
       case Full(uid) => user.doSomethingWithFacebookId(uid)
     }
 
-Finally, send the user to the auth URL.
+Finally redirect the user back to the appropriate place in the application, using the optional `returnTo` variable:
 
-    S.redirectTo("/auth/facebook/signin")
-    
+    val url = Omniauth.returnTo.openOr("/")
+    S.redirectTo(url)
 
 ## Installation
 
@@ -63,7 +71,7 @@ For *Lift 3.0.x* (Scala 2.10):
 
     "net.liftmodules" %% "omniauth_3.0" % "0.10"
 
-
+    
 ## Providers
 
 Lift-OmniAuth currently supports the following external providers:
