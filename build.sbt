@@ -12,7 +12,7 @@ name <<= (name, liftEdition) { (n, e) =>  n + "_" + e }
 
 scalaVersion <<= scalaVersion ?? "2.9.1"  // This project's scala version is purposefully set at the lowest common denominator to ensure each version compiles.
 
-crossScalaVersions := Seq("2.10.3", "2.9.2", "2.9.1-1", "2.9.1")
+crossScalaVersions := Seq("2.10.4", "2.9.2", "2.9.1-1", "2.9.1")
 
 resolvers += "CB Central Mirror" at "http://repo.cloudbees.com/content/groups/public"
 
@@ -29,19 +29,16 @@ libraryDependencies <++= liftVersion { v =>
 
 //scalacOptions ++= Seq("-feature")
 
-publishTo := Some("mentor-archiva" at "http://orw-symc-vm:9080/archiva/repository/internal/")
+publishTo <<= version { _.endsWith("SNAPSHOT") match {
+        case true  => Some("snapshots" at "https://oss.sonatype.org/content/repositories/snapshots")
+        case false => Some("releases" at "https://oss.sonatype.org/service/local/staging/deploy/maven2")
+  }
+ }
 
-credentials ++= Seq(
-  Credentials("Repository Archiva Managed internal Repository",
-              "orw-symc-vm",
-              "jbarnes",
-              "t!OJ890b"),
-  Credentials("Sonatype Nexus Repository Manager",
-              "oss.sonatype.org",
-              "barnesjd",
-              "t!OJ890a")
-)
+credentials += Credentials( file("sonatype.credentials") )
 
+credentials += Credentials( file("/private/liftmodules/sonatype.credentials") )
+ 
 publishMavenStyle := true
 
 publishArtifact in Test := false
