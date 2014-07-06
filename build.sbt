@@ -12,7 +12,7 @@ name <<= (name, liftEdition) { (n, e) =>  n + "_" + e }
 
 scalaVersion <<= scalaVersion ?? "2.9.1"  // This project's scala version is purposefully set at the lowest common denominator to ensure each version compiles.
 
-crossScalaVersions := Seq("2.11.1", "2.10.4", "2.9.2", "2.9.1-1", "2.9.1")
+crossScalaVersions := Seq("2.10.4", "2.9.2", "2.9.1-1", "2.9.1") // Excluding "2.11.1" since Lift 2.5.1 isn't built for it
 
 resolvers += "CB Central Mirror" at "http://repo.cloudbees.com/content/groups/public"
 
