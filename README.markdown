@@ -89,14 +89,14 @@ libraryDependencies ++= {
 
   Seq(
     // Other dependencies ...
-    "net.liftmodules" %% ("omniauth_"+liftEdition) % "0.12" % "compile"
+    "net.liftmodules" %% ("omniauth_"+liftEdition) % "0.13" % "compile"
   )
 }
 ```
 
 ## Supported Versions
 
-**Lift-OmniAuth** is built and released to support Lift editions 2.5 and 2.6 with Scala versions 2.9.1, 2.9.1-1, 2.9.2, and 2.10; and Lift edition 3.0 with Scala version 2.10.3.  This project's scala version is purposefully set at the lowest common denominator to ensure each version compiles.
+**Lift-OmniAuth** is built and released to support Lift edition 2.5 with Scala versions 2.9.1, 2.9.1-1, 2.9.2, and 2.10; Lift edition 2.6 with Scala versions 2.9.1, 2.9.1-1, 2.9.2, 2.10, 2.11; and Lift edition 3.0 with Scala version 2.10.  This project's scala version is purposefully set at the lowest common denominator to ensure each version compiles.
 
     
 ## Providers
