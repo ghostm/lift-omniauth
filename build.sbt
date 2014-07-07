@@ -2,7 +2,7 @@ name := "Omniauth"
 
 organization := "net.liftmodules"
 
-version := "0.12"
+version := "0.13"
 
 liftVersion <<= liftVersion ?? "2.5.1"
 
@@ -12,7 +12,7 @@ name <<= (name, liftEdition) { (n, e) =>  n + "_" + e }
 
 scalaVersion <<= scalaVersion ?? "2.9.1"  // This project's scala version is purposefully set at the lowest common denominator to ensure each version compiles.
 
-crossScalaVersions := Seq("2.10.4", "2.9.2", "2.9.1-1", "2.9.1")
+crossScalaVersions := Seq("2.11.1", "2.10.4", "2.9.2", "2.9.1-1", "2.9.1")
 
 resolvers += "CB Central Mirror" at "http://repo.cloudbees.com/content/groups/public"
 
@@ -20,10 +20,10 @@ resolvers += "Sonatype snapshots" at "http://oss.sonatype.org/content/repositori
 
 libraryDependencies <++= liftVersion { v =>
   Seq("net.liftweb"   %% "lift-webkit"  % v  % "provided",
-      "net.databinder" %% "dispatch-core" % "0.8.9",
-      "net.databinder" %% "dispatch-http" % "0.8.9",
-      "net.databinder" %% "dispatch-oauth" % "0.8.9",
-      "net.databinder" %% "dispatch-http-json" % "0.8.9"
+      "net.databinder" %% "dispatch-core" % "0.8.10",
+      "net.databinder" %% "dispatch-http" % "0.8.10",
+      "net.databinder" %% "dispatch-oauth" % "0.8.10",
+      "net.databinder" %% "dispatch-http-json" % "0.8.10"
     )
 }
 
