@@ -30,7 +30,7 @@ class VKProvider(appId: String, secret: String) extends OmniauthProvider{
 
   override def callback(): NodeSeq = {
     val code = S.param("code") openOr S.redirectTo("/")
-    println("GOT CODE" + code)
+    logger.debug("GOT CODE" + code)
     val callbackUrl = Omniauth.siteAuthBaseUrl + "auth/" + providerName + "/callback"
     var urlParams = Map.empty[String, String]
     urlParams += "client_id" ->  appId
