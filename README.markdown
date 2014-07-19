@@ -112,6 +112,7 @@ libraryDependencies ++= {
   * Linkedin
   * Google+
   * Instagram
+  * VK
 
 ## Tutorials
 [Joe Barnes](https://github.com/joescii) has written [Dropbox tutorial](http://proseand.co.nz/2014/01/20/integrating-dropbox-into-a-lift-app/).
