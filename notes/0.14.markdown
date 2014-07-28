@@ -1,0 +1,3 @@
+#scala @liftweb
+
+Supports vk.com authorization.  Thank you [Mike Limansky](https://github.com/limansky) for the contribution!

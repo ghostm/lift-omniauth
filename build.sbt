@@ -2,6 +2,8 @@ name := "Omniauth"
 
 organization := "net.liftmodules"
 
+homepage := Some(url("https://github.com/ghostm/lift-omniauth"))
+
 version := "0.14"
 
 liftVersion <<= liftVersion ?? "2.5.1"
@@ -46,14 +48,6 @@ publishArtifact in Test := false
 pomIncludeRepository := { _ => false }
 
 pomExtra := (
-        <url>https://github.com/ghostm/lift-omniauth</url>
-        <licenses>
-            <license>
-              <name>Apache 2.0 License</name>
-              <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-              <distribution>repo</distribution>
-            </license>
-         </licenses>
          <scm>
             <url>git@github.com:ghostm/lift-omniauth.git</url>
             <connection>scm:git:git@github.com:ghostm/lift-omniauth.git</connection>
@@ -66,3 +60,17 @@ pomExtra := (
             </developer>
          </developers>
  )
+
+licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
+
+seq(lsSettings :_*)
+
+(LsKeys.tags in LsKeys.lsync) := Seq("lift", "oauth")
+
+(description in LsKeys.lsync) := "Omniauth for Lift"
+
+(LsKeys.ghUser in LsKeys.lsync) := Some("ghostm")
+
+(LsKeys.ghRepo in LsKeys.lsync) := Some("lift-omniauth")
+
+(LsKeys.ghBranch in LsKeys.lsync) := Some("master")
