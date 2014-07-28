@@ -1,10 +1,10 @@
 {
   "organization" : "net.liftmodules",
-  "name" : "Omniauth",
+  "name" : "Omniauth_2.5",
   "version" : "0.14",
   "description" : "Omniauth for Lift",
   "site" : "https://github.com/ghostm/lift-omniauth",
-  "tags" : [ "lift", "oauth" ],
+  "tags" : [ "lift", "oauth", "facebook", "twitter", "github", "MSLive", "Dropbox", "LinkedIn", "Google+", "Instagram", "VK" ],
   "docs" : "",
   "resolvers" : [ "https://oss.sonatype.org/content/repositories/releases" ],
   "dependencies" : [ {
