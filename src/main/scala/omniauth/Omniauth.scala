@@ -191,4 +191,5 @@ case class AuthInfo(provider:String,
                     nickName:Option[String] = None,
                     email:Option[String] = None,
                     firstName:Option[String]=None,
-                    lastName:Option[String]=None)
+                    lastName:Option[String]=None,
+                    extraData:Option[Map[String, Any]]=None)
