@@ -4,13 +4,17 @@ organization := "net.liftmodules"
 
 homepage := Some(url("https://github.com/ghostm/lift-omniauth"))
 
-version := "0.14"
+version := "0.15"
 
 liftVersion <<= liftVersion ?? "2.5.1"
 
 liftEdition <<= liftVersion apply { _.substring(0,3) }
 
 name <<= (name, liftEdition) { (n, e) =>  n + "_" + e }
+
+// Necessary beginning with sbt 0.13, otherwise Lift editions get messed up.
+// E.g. "2.5" gets converted to "2-5"
+moduleName := name.value.toLowerCase
 
 scalaVersion <<= scalaVersion ?? "2.9.1"  // This project's scala version is purposefully set at the lowest common denominator to ensure each version compiles.
 

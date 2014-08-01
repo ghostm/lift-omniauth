@@ -1,0 +1,6 @@
+#scala @liftweb
+
+* Added `extraData` for storing a map of provider-specific extra attribute/value pairs  
+* Implemented `extraData` for Google+
+
+Thank you [Emmanuel Eytan](https://github.com/eje211) for the contribution!
