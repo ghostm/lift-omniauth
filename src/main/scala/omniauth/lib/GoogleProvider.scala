@@ -77,13 +77,22 @@ class GoogleProvider(val clientId:String, val secret:String) extends OmniauthPro
     try{
       val json = Omniauth.http(tempRequest >- JsonParser.parse)
 
-      val uid =  (json \ "id").extract[String]
-      val name =  (json \ "name").extract[String]
-      val firstName = (json \ "given_name").extract[String]
-      val lastName = (json \ "family_name").extract[String]
-      val email = (json \ "email").extract[String]
+      val uid       =  (json \ "id"        ).extract[String]
+      val name      =  (json \ "name"      ).extract[String]
+      val firstName = (json \ "given_name" ).extract[String]
+      val lastName  = (json \ "family_name").extract[String]
+      val email     = (json \ "email"      ).extract[String]
+      val extraData:Map[String, Any] = List(
+          ("verified_email", (json \ "verified_email").extractOpt[Boolean]),
+          ("link"          , (json \ "link"          ).extractOpt[String]),
+          ("picture"       , (json \ "picture"       ).extractOpt[String]),
+          ("gender"        , (json \ "gender"        ).extractOpt[String]),
+          ("locale"        , (json \ "locale"        ).extractOpt[String]),
+          ("hd"            , (json \ "hd"            ).extractOpt[String])).
+          filter(_._2.isDefined).map(item => (item._1, item._2.get)).
+          toMap
       val ai = AuthInfo(providerName,uid,name,accessToken,Some(secret),
-        Some(name), Some(email), Some(firstName), Some(lastName))
+        Some(name), Some(email), Some(firstName), Some(lastName), Some(extraData))
       Omniauth.setAuthInfo(ai)
       logger.debug(ai)
 
