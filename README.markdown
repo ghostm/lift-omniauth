@@ -1,4 +1,4 @@
-# Lift-Omniauth Module
+﻿# Lift-Omniauth Module
 ## Usage
 in `Boot.scala`
 
@@ -113,6 +113,7 @@ libraryDependencies ++= {
   * Google+
   * Instagram
   * VK
+  * Kuaipan(金山快盘/迅雷快盘)
 
 ## Tutorials
 [Joe Barnes](https://github.com/joescii) has written [Dropbox tutorial](http://proseand.co.nz/2014/01/20/integrating-dropbox-into-a-lift-app/).
