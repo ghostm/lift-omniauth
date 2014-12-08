@@ -4,7 +4,7 @@ organization := "net.liftmodules"
 
 homepage := Some(url("https://github.com/ghostm/lift-omniauth"))
 
-version := "0.15"
+version := "0.16-SNAPSHOT"
 
 liftVersion <<= liftVersion ?? "2.5.1"
 
