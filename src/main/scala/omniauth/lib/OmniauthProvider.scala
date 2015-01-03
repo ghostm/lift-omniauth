@@ -16,6 +16,12 @@
 
 package omniauth.lib
 
+import java.net.URLEncoder
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
+
+import sun.misc.BASE64Encoder
+
 import xml.NodeSeq
 import net.liftweb.common.{Box,Loggable}
 import net.liftweb.http.S
@@ -34,11 +40,28 @@ abstract class OmniauthProvider extends Loggable {
   def validateToken(token: AuthToken): Boolean
   def tokenToId(token:AuthToken): Box[String]
 
-  val csrf = {
+  def csrf = {
     val bs: Array[Byte] = new Array(16)
     val r = SecureRandom.getInstance("SHA1PRNG", "SUN")
     r.nextBytes(bs)
     bs.map(Integer.toHexString(_)).reduce(_ + _)
+  }
+
+  // HMAC-SHA1 method
+  private def sign_hmacsha1(signature_baseString:String, secret:String):String = {
+    val mac = Mac.getInstance("HmacSHA1")
+    val spec = new SecretKeySpec(secret.getBytes(), "HmacSHA1")
+    mac.init(spec)
+    val byteHMAC = mac.doFinal(signature_baseString.getBytes())
+    new BASE64Encoder().encode(byteHMAC)
+  }
+
+  protected def generateSignature(request_method:String, base_url:String, secret:String, params:Map[String, String]):String = {
+    val signature_baseString = request_method + "&" +
+      URLEncoder.encode(base_url, "UTF-8") + "&" +
+      URLEncoder.encode(
+        params.toList.sortBy(_._1).map(p => p._1 + "=" + URLEncoder.encode(p._2, "UTF-8")).mkString("&"), "UTF-8")
+    sign_hmacsha1(signature_baseString, secret)
   }
 
   protected def extractToken(resp: String) = {
