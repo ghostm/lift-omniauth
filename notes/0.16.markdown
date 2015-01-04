@@ -1,0 +1,5 @@
+#scala @liftweb
+
+* Implemented provider for Kuaipan(金山快盘/迅雷快盘)
+
+Thank you [Tuo Wang](https://github.com/tuowangpyp) for the contribution!
