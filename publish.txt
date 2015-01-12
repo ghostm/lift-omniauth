@@ -1,4 +1,4 @@
-alias pub=publish-signed
+alias pub=publishSigned
 
 clean
 
@@ -6,7 +6,7 @@ set liftVersion  in ThisBuild:="3.0-SNAPSHOT"
 set crossScalaVersions := Seq("2.11.4")
 + pub
 
-set liftVersion  in ThisBuild:="2.6-SNAPSHOT"
+set liftVersion  in ThisBuild:="2.6"
 set crossScalaVersions := Seq("2.11.4", "2.10.4", "2.9.2", "2.9.1-1", "2.9.1")
 + pub
 
