@@ -37,7 +37,7 @@ trait Omniauth  {
   *      if (Props.inGAE) { new dispatch.gae.Http } else { new Http } 
   *  }}}
   */
-  val http =  new Http
+  val http = Http
   var TwitterHost = :/("api.twitter.com").secure
   val twitterOauthRequest = TwitterHost / "oauth"
 
