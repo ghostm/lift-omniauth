@@ -1,0 +1,6 @@
+#scala @liftweb
+
+* Resolving a race condition caused by using a non-thread-safe `dispatch.Http` instance.
+See [Issue #47](https://github.com/ghostm/lift-omniauth/issues/47)
+
+

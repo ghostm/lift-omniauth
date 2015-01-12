@@ -89,7 +89,7 @@ libraryDependencies ++= {
 
   Seq(
     // Other dependencies ...
-    "net.liftmodules" %% ("omniauth_"+liftEdition) % "0.16" % "compile"
+    "net.liftmodules" %% ("omniauth_"+liftEdition) % "0.17" % "compile"
   )
 }
 ```
