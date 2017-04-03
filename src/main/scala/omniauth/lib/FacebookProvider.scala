@@ -23,6 +23,7 @@ import net.liftweb.json.JsonParser
 import net.liftweb.http._
 import omniauth.AuthInfo
 import net.liftweb.json._
+import scala.util.control.NonFatal
 
 case class FacebookTokenResponse(access_token : String, token_type : String, expires_in : Long)
 
@@ -85,8 +86,8 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
       validToken = validateToken(accessToken)
 
     } catch {
-      case unknown : Throwable => {
-        println("Something went wrong with the access_token" + unknown)
+      case NonFatal(unknown) => {
+        logger.debug("Something went wrong with the access_token : " +  unknown)
         S.redirectTo(Omniauth.failureRedirect)
       }
     }
