@@ -87,7 +87,7 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
 
     } catch {
       case NonFatal(unknown) => {
-        logger.debug("Something went wrong with the access_token : " +  unknown)
+        logger.debug("Something went wrong with the access_token : " + unknown)
         S.redirectTo(Omniauth.failureRedirect)
       }
     }
