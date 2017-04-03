@@ -22,7 +22,9 @@ import net.liftweb.common.{Full, Empty, Box}
 import net.liftweb.json.JsonParser
 import net.liftweb.http._
 import omniauth.AuthInfo
+import net.liftweb.json._
 
+case class FacebookTokenResponse(access_token : String, token_type : String, expires_in : Long)
 
 class FacebookProvider(val clientId:String, val secret:String) extends OmniauthProvider{
   def providerName = FacebookProvider.providerName
@@ -47,7 +49,21 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
     S.redirectTo(requestUrl)
   }
 
+/*
+ * changing the callback because as of FB graph api v2.3 access_token in query parameter is gone.
+ * The breaking change is 
+ * https://developers.facebook.com/docs/apps/changelog
+ * 
+ * [Oauth Access Token] Format - The response format of https://www.facebook.com/v2.3/oauth/access_token returned when you 
+ * exchange a code for an access_token now return valid JSON instead of being URL encoded. The new format of this response 
+ * is {"access_token": {TOKEN}, "token_type":{TYPE}, "expires_in":{TIME}}. We made this update to be compliant with section 
+ * 5.1 of RFC 6749.
+ *
+ */
+
   def doFacebookCallback () : NodeSeq = {
+
+    logger.debug("doFacebookCallback")
     val fbCode = S.param("code") openOr S.redirectTo("/")
     val callbackUrl = Omniauth.siteAuthBaseUrl+"auth/"+providerName+"/callback"
     var urlParameters = Map[String, String]()
@@ -56,11 +72,29 @@ class FacebookProvider(val clientId:String, val secret:String) extends OmniauthP
     urlParameters += ("client_secret" -> secret)
     urlParameters += ("code" -> fbCode.toString)
     val tempRequest = :/("graph.facebook.com").secure / "oauth/access_token" <<? urlParameters
-    val accessToken = extractToken(Omniauth.http(tempRequest as_str))
 
-    if(validateToken(accessToken)){
+    implicit val formats = net.liftweb.json.DefaultFormats
+
+    var validToken = false
+    try {
+      val accessTokenStr = Omniauth.http(tempRequest >- { json => json })
+      val accessTokenJSON = parse(accessTokenStr).extract[FacebookTokenResponse]
+      logger.debug("extract token from json " + accessTokenJSON)
+      val accessToken = AuthToken(accessTokenJSON.access_token, None, None, None)
+
+      validToken = validateToken(accessToken)
+
+    } catch {
+      case unknown : Throwable => {
+        println("Something went wrong with the access_token" + unknown)
+        S.redirectTo(Omniauth.failureRedirect)
+      }
+    }
+
+    // put this outside the try block because redirectTo throws ResponseShortcutException
+    if (validToken) {
       S.redirectTo(Omniauth.successRedirect)
-    }else{
+    } else {
       S.redirectTo(Omniauth.failureRedirect)
     }
   }
